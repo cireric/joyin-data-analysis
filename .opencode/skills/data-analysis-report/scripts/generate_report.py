@@ -201,8 +201,12 @@ def fill_missing_values(df: pd.DataFrame, key_column: str, value_columns: list) 
         previous_col = f"{col_name}_previous"
         
         if current_col in df.columns and previous_col in df.columns:
-            df[current_col] = df[current_col].fillna(0)
-            df[previous_col] = df[previous_col].fillna(0)
+            both_have_data = df[current_col].notna() & df[previous_col].notna()
+            one_has_data = df[current_col].notna() | df[previous_col].notna()
+            fill_mask = one_has_data & ~both_have_data
+            
+            df.loc[fill_mask, current_col] = df.loc[fill_mask, current_col].fillna(0)
+            df.loc[fill_mask, previous_col] = df.loc[fill_mask, previous_col].fillna(0)
     
     return df
 
