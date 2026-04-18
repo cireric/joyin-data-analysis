@@ -17,11 +17,57 @@ from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
 
 try:
     sys.stdout.reconfigure(encoding='utf-8')
 except AttributeError:
     pass
+
+
+def validate_path(path: str, base_dir: str = None) -> Path:
+    """
+    Validate path is safe and within expected directory.
+    
+    Args:
+        path: Path to validate
+        base_dir: Optional base directory to restrict access
+        
+    Returns:
+        Resolved Path object
+        
+    Raises:
+        ValueError: If path is invalid or outside base_dir
+    """
+    resolved = Path(path).resolve()
+    
+    if base_dir:
+        base = Path(base_dir).resolve()
+        try:
+            resolved.relative_to(base)
+        except ValueError:
+            raise ValueError(f"Path '{path}' is outside allowed directory '{base_dir}'")
+    
+    if not resolved.exists():
+        raise FileNotFoundError(f"Path not found: {path}")
+    
+    return resolved
+
+
+def sanitize_filename(name: str) -> str:
+    """
+    Sanitize filename by removing dangerous characters.
+    
+    Args:
+        name: Original filename
+        
+    Returns:
+        Safe filename string
+    """
+    import re
+    sanitized = re.sub(r'[<>:"/\\|?*\.\.]', '_', name)
+    sanitized = sanitized.strip()
+    return sanitized if sanitized else 'output'
 
 
 def load_config(config_path: str) -> dict:
@@ -75,6 +121,26 @@ def merge_periods(data: dict, periods: dict, key_column: str, value_columns: lis
     return merged
 
 
+def fill_missing_values(df: pd.DataFrame, key_column: str, value_columns: list) -> pd.DataFrame:
+    """
+    Fill missing values for existing points.
+    
+    Logic:
+    - Point exists in both periods but data missing → fill with 0
+    - Point only exists in one period → keep NaN (comparison shows N/A)
+    """
+    for vc in value_columns:
+        col_name = vc['name'] if isinstance(vc, dict) else vc
+        current_col = f"{col_name}_current"
+        previous_col = f"{col_name}_previous"
+        
+        if current_col in df.columns and previous_col in df.columns:
+            df[current_col] = df[current_col].fillna(0)
+            df[previous_col] = df[previous_col].fillna(0)
+    
+    return df
+
+
 def calc_comparison(current, previous):
     """
     Calculate comparison percentage.
@@ -120,6 +186,26 @@ def add_totals(df: pd.DataFrame, key_column: str, value_columns: list, analysis_
             totals[f"{col_name}_yoy"] = calc_comparison(current_total, previous_total)
 
     return pd.concat([df, pd.DataFrame([totals])], ignore_index=True)
+
+
+def reorder_value_columns(value_columns: list) -> list:
+    """
+    Reorder columns: priority columns (含'总') first, then others.
+    """
+    priority = []
+    others = []
+    
+    for vc in value_columns:
+        col_name = vc['name'] if isinstance(vc, dict) else vc
+        first_char = col_name[0]
+        is_priority = (first_char == '总')
+        
+        if is_priority:
+            priority.append(vc)
+        else:
+            others.append(vc)
+    
+    return priority + others
 
 
 def filter_group_metrics(value_columns: list, metrics_config) -> list:
@@ -211,6 +297,23 @@ def generate_group_summary(data: dict, periods: dict, group_config: dict,
     return result
 
 
+def auto_fit_columns(ws):
+    """Auto-fit column widths based on content."""
+    for col_idx in range(1, ws.max_column + 1):
+        max_length = 0
+        col_letter = get_column_letter(col_idx)
+        
+        for row_idx in range(1, ws.max_row + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            if cell.value:
+                cell_length = len(str(cell.value))
+                if cell_length > max_length:
+                    max_length = cell_length
+        
+        adjusted_width = max_length + 2
+        ws.column_dimensions[col_letter].width = max(adjusted_width, 8)
+
+
 def style_workbook(ws, value_columns: list, analysis_types: list):
     """Apply styling to worksheet: header, borders, number formats, total row."""
     header_fill = PatternFill(start_color='4472C4', fill_type='solid')
@@ -235,10 +338,11 @@ def style_workbook(ws, value_columns: list, analysis_types: list):
     col_idx = 2
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
-        if '杯数' in col_name:
+        is_int = '杯' in col_name
+        if is_int:
             int_cols.add(col_idx)
         col_idx += 1
-        if '杯数' in col_name:
+        if is_int:
             int_cols.add(col_idx)
         col_idx += 1
         if 'yoy' in analysis_types:
@@ -266,9 +370,7 @@ def style_workbook(ws, value_columns: list, analysis_types: list):
         cell.fill = total_fill
         cell.font = total_font
 
-    ws.column_dimensions['A'].width = 30
-    for col_letter in ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']:
-        ws.column_dimensions[col_letter].width = 14
+    auto_fit_columns(ws)
 
 
 def style_group_sheet(ws, metrics: list):
@@ -294,10 +396,11 @@ def style_group_sheet(ws, metrics: list):
     int_cols = set()
     col_idx = 2
     for m in metrics:
-        if '杯数' in m:
+        is_int = '杯' in m
+        if is_int:
             int_cols.add(col_idx)
         col_idx += 1
-        if '杯数' in m:
+        if is_int:
             int_cols.add(col_idx)
         col_idx += 1
         yoy_cols.add(col_idx)
@@ -324,9 +427,7 @@ def style_group_sheet(ws, metrics: list):
         cell.fill = total_fill
         cell.font = total_font
 
-    ws.column_dimensions['A'].width = 15
-    for col_letter in ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']:
-        ws.column_dimensions[col_letter].width = 14
+    auto_fit_columns(ws)
 
 
 def generate_report(config_path: str) -> str:
@@ -349,6 +450,8 @@ def generate_report(config_path: str) -> str:
         config['value_columns']
     )
 
+    merged = fill_missing_values(merged, config['key_column'], config['value_columns'])
+
     result = calculate_analysis(
         merged,
         config['value_columns'],
@@ -362,8 +465,10 @@ def generate_report(config_path: str) -> str:
         config['analysis']
     )
 
+    reordered_columns = reorder_value_columns(config['value_columns'])
+
     output_cols = [config['key_column']]
-    for vc in config['value_columns']:
+    for vc in reordered_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
         output_cols.extend([
             f"{col_name}_previous",
@@ -391,7 +496,7 @@ def generate_report(config_path: str) -> str:
     for r in dataframe_to_rows(result, index=False, header=True):
         ws.append(r)
 
-    style_workbook(ws, config['value_columns'], config['analysis'])
+    style_workbook(ws, reordered_columns, config['analysis'])
 
     if 'group_by' in config and config['group_by']:
         group_config = config['group_by']
