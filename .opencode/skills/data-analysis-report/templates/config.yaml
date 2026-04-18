@@ -15,7 +15,12 @@ data_source:
 # Column configuration
 key_column: 点位名称          # Column to merge on (must exist in all periods)
 value_columns:               # Columns to analyze
+  - name: 线上杯数
+  - name: 线下杯数
+  - name: 测试杯
   - name: 总杯数
+  - name: 线上金额
+  - name: 线下金额
   - name: 总金额
 
 # Period configuration
