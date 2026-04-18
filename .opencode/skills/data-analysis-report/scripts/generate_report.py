@@ -523,8 +523,10 @@ def generate_report(config_path: str) -> str:
         Path to generated Excel file
     """
     config = load_config(config_path)
+    validate_config(config)
 
     data = load_data(config)
+    validate_data(data, config['periods'], config['key_column'], config['value_columns'])
     merged = merge_periods(
         data,
         config['periods'],
@@ -604,7 +606,8 @@ def generate_report(config_path: str) -> str:
     output_dir = Path(config['output']['dir']) / date_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     time_str = datetime.now().strftime('%H%M%S')
-    output_file = output_dir / f"{config['output']['title']}_{time_str}.xlsx"
+    safe_title = sanitize_filename(config['output']['title'])
+    output_file = output_dir / f"{safe_title}_{time_str}.xlsx"
     wb.save(output_file)
 
     print(f"报表已生成: {output_file}")
