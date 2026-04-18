@@ -267,6 +267,8 @@ def reorder_value_columns(value_columns: list) -> list:
     
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
+        if not col_name:
+            continue
         first_char = col_name[0]
         is_priority = (first_char == '总')
         
