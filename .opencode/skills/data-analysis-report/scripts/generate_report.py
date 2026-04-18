@@ -96,6 +96,46 @@ def validate_config(config: dict) -> None:
         raise ValueError("Config 'value_columns' cannot be empty")
 
 
+def validate_data(data: dict, periods: dict, key_column: str, value_columns: list) -> None:
+    """
+    Validate loaded data has required periods and columns.
+    
+    Args:
+        data: Dict of period DataFrames
+        periods: Period labels
+        key_column: Key column name
+        value_columns: List of value column configs
+        
+    Raises:
+        ValueError: If data is invalid
+    """
+    current_key = periods['current']
+    previous_key = periods['previous']
+    
+    if current_key not in data:
+        raise ValueError(f"Current period data not found: '{current_key}'")
+    if previous_key not in data:
+        raise ValueError(f"Previous period data not found: '{previous_key}'")
+    
+    for period_key in [current_key, previous_key]:
+        df = data[period_key]
+        
+        if df.empty:
+            raise ValueError(f"Empty dataset for period: '{period_key}'")
+        
+        if key_column not in df.columns:
+            raise ValueError(f"Key column '{key_column}' not found in period '{period_key}'")
+        
+        missing_cols = []
+        for vc in value_columns:
+            col_name = vc['name'] if isinstance(vc, dict) else vc
+            if col_name not in df.columns:
+                missing_cols.append(col_name)
+        
+        if missing_cols:
+            raise ValueError(f"Value columns not found in period '{period_key}': {missing_cols}")
+
+
 def load_config(config_path: str) -> dict:
     """Load configuration from YAML file."""
     with open(config_path, 'r', encoding='utf-8') as f:
