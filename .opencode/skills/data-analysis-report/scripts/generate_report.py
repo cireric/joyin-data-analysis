@@ -326,9 +326,19 @@ def generate_group_summary(data: dict, periods: dict, group_config: dict,
     current_df = data[periods['current']].copy()
     previous_df = data[periods['previous']].copy()
 
+    if group_col not in current_df.columns:
+        raise ValueError(f"Group column '{group_col}' not found in current period data")
+    if group_col not in previous_df.columns:
+        raise ValueError(f"Group column '{group_col}' not found in previous period data")
+
     if null_handling == 'ignore':
         current_df = current_df[current_df[group_col].notna()]
         previous_df = previous_df[previous_df[group_col].notna()]
+
+    if current_df.empty:
+        raise ValueError("Current period data is empty after filtering null group values")
+    if previous_df.empty:
+        raise ValueError("Previous period data is empty after filtering null group values")
 
     group_current = current_df.groupby(group_col)[metrics].sum().reset_index()
     group_previous = previous_df.groupby(group_col)[metrics].sum().reset_index()
