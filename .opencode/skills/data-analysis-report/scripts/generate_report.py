@@ -70,6 +70,32 @@ def sanitize_filename(name: str) -> str:
     return sanitized if sanitized else 'output'
 
 
+def validate_config(config: dict) -> None:
+    """
+    Validate configuration has all required fields.
+    
+    Args:
+        config: Configuration dictionary
+        
+    Raises:
+        ValueError: If required fields are missing
+    """
+    required_keys = ['data_source', 'periods', 'key_column', 'value_columns', 'analysis', 'output']
+    
+    for key in required_keys:
+        if key not in config:
+            raise ValueError(f"Missing required config key: '{key}'")
+    
+    if 'current' not in config['periods'] or 'previous' not in config['periods']:
+        raise ValueError("Config 'periods' must have 'current' and 'previous' keys")
+    
+    if 'title' not in config['output'] or 'dir' not in config['output']:
+        raise ValueError("Config 'output' must have 'title' and 'dir' keys")
+    
+    if not config['value_columns']:
+        raise ValueError("Config 'value_columns' cannot be empty")
+
+
 def load_config(config_path: str) -> dict:
     """Load configuration from YAML file."""
     with open(config_path, 'r', encoding='utf-8') as f:
