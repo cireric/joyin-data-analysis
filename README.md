@@ -51,7 +51,6 @@ data_analysis/
 ├── .opencode/          # OpenCode Skills
 │   └── skills/
 │       └── data-analysis-report/
-├── data_analysis_202603.py  # 主入口
 ├── requirements.txt
 └── AGENTS.md           # 项目配置
 ```
