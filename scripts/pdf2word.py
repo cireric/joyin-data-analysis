@@ -39,11 +39,25 @@ def parse_args():
     return parser.parse_args()
 
 
+def validate_input(input_path: str) -> Path:
+    """验证输入文件"""
+    path = Path(input_path)
+    
+    if not path.exists():
+        print(f"错误: 文件不存在: {input_path}", file=sys.stderr)
+        sys.exit(1)
+    
+    if path.suffix.lower() != '.pdf':
+        print(f"错误: 文件格式错误: 需要PDF文件", file=sys.stderr)
+        sys.exit(1)
+    
+    return path
+
+
 def main():
     args = parse_args()
-    print(f"输入文件: {args.input}")
-    print(f"输出文件: {args.output}")
-    print(f"页码范围: {args.pages}")
+    input_path = validate_input(args.input)
+    print(f"输入文件: {input_path}")
 
 
 if __name__ == '__main__':
