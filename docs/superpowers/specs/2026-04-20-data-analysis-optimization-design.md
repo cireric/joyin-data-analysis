@@ -3,25 +3,16 @@
 ## 背景
 
 数据分析程序存在以下问题：
-1. `generate_report.py` 第 68-83 行语法错误
-2. 错误处理不一致：`period_parser.py` 抛异常，`file_validator.py` 返回元组
-3. `generate_report_from_config()` 函数 75 行，职责过多
+1. 错误处理不一致：`period_parser.py` 抛异常，`file_validator.py` 返回元组
+2. `generate_report_from_config()` 函数 75 行，职责过多
 
 ## 目标
 
-最小可行优化：修复问题、统一风格、拆分大函数，保持现有架构。
+最小可行优化：统一错误处理风格、拆分大函数，保持现有架构。
 
 ## 设计
 
-### 1. 修复语法错误
-
-**文件：** `.opencode/skills/data-analysis-report/scripts/generate_report.py`
-
-**问题：** 第 68-83 行代码损坏，需检查并修复 `sanitize_filename` 和 `validate_config` 函数。
-
-**修复方案：** 根据函数签名和上下文重建正确实现。
-
-### 2. 统一错误处理
+### 1. 统一错误处理
 
 **文件：** `scripts/file_validator.py`
 
@@ -74,7 +65,7 @@ except FileNotFoundError as e:
     sys.exit(1)
 ```
 
-### 3. 拆分大函数
+### 2. 拆分大函数
 
 **文件：** `scripts/run_analysis.py`
 
@@ -165,7 +156,6 @@ def generate_report_from_config(config: dict) -> tuple:
 
 | 文件 | 修改类型 |
 |------|----------|
-| `.opencode/skills/data-analysis-report/scripts/generate_report.py` | 修复语法错误 |
 | `scripts/file_validator.py` | 修改 `validate()` 返回类型 |
 | `scripts/run_analysis.py` | 拆分函数 + 修改调用方式 |
 
