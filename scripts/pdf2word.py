@@ -152,9 +152,10 @@ def main():
     else:
         output_path = input_path.with_suffix('.docx')
     
-    print(f"正在转换: {input_path} -> {output_path}")
+    mode_str = "严格模式" if args.mode == 'strict' else "普通模式"
+    print(f"正在转换: {input_path} -> {output_path} ({mode_str})")
     
-    if convert_pdf_to_docx(input_path, output_path, pages):
+    if convert_pdf_to_docx(input_path, output_path, pages, args.mode, args.debug):
         print(f"转换完成: {output_path}")
     else:
         sys.exit(1)
