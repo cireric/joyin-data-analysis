@@ -96,7 +96,8 @@ def parse_page_range(page_str: str) -> list:
     return sorted(pages)
 
 
-def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None) -> bool:
+def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
+                        mode: str = 'normal', debug: bool = False) -> bool:
     """
     将PDF转换为Word文档
     
@@ -104,6 +105,8 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None)
         input_path: 输入PDF文件路径
         output_path: 输出Word文件路径
         pages: 页码列表，None表示全部页面
+        mode: 转换模式，'normal'或'strict'
+        debug: 是否输出调试信息
     
     Returns:
         True if successful, False otherwise
@@ -111,12 +114,25 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None)
     try:
         from pdf2docx import Converter
         
+        convert_params = {}
+        
+        if mode == 'strict':
+            convert_params = {
+                'multi_processing': False,
+                'debug': debug,
+            }
+        else:
+            convert_params = {
+                'multi_processing': True,
+                'debug': debug,
+            }
+        
         cv = Converter(str(input_path))
         try:
             if pages:
-                cv.convert(str(output_path), pages=pages)
+                cv.convert(str(output_path), pages=pages, **convert_params)
             else:
-                cv.convert(str(output_path))
+                cv.convert(str(output_path), **convert_params)
             return True
         finally:
             cv.close()
