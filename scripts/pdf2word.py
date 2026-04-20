@@ -54,10 +54,52 @@ def validate_input(input_path: str) -> Path:
     return path
 
 
+def parse_page_range(page_str: str) -> list:
+    """
+    解析页码范围字符串
+    
+    支持格式:
+        1-5      -> [1, 2, 3, 4, 5]
+        1,3,5    -> [1, 3, 5]
+        1-3,5,7-9 -> [1, 2, 3, 5, 7, 8, 9]
+    """
+    if not page_str:
+        return None
+    
+    pages = set()
+    parts = page_str.split(',')
+    
+    for part in parts:
+        part = part.strip()
+        if '-' in part:
+            try:
+                start, end = part.split('-')
+                start, end = int(start.strip()), int(end.strip())
+                if start > end:
+                    print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
+                    sys.exit(1)
+                pages.update(range(start, end + 1))
+            except ValueError:
+                print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            try:
+                pages.add(int(part))
+            except ValueError:
+                print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
+                sys.exit(1)
+    
+    return sorted(pages)
+
+
 def main():
     args = parse_args()
     input_path = validate_input(args.input)
+    pages = parse_page_range(args.pages)
+    
     print(f"输入文件: {input_path}")
+    if pages:
+        print(f"页码范围: {pages}")
 
 
 if __name__ == '__main__':
