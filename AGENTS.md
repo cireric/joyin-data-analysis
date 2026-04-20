@@ -6,7 +6,7 @@
   - Quarterly: `make analyze c=2026Q1 p=2025Q1`
   - Monthly: `make analyze c=2026.03 p=2026.02`
   - Custom: `make analyze c=2026.04.13~2026.04.19 p=2026.04.06~2026.04.12`
-- PDF to Word: `python scripts/pdf2word.py input.pdf [-o output.docx] [--pages 1-5]`
+- PDF to Word: `python scripts/pdf2word.py input.pdf [-o output.docx] [--pages 1-5] [--mode strict] [--debug]`
 - Install deps: `.venv\Scripts\pip install -r requirements.txt`
 - Activate venv: `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Unix)
 - Clean up: `make clean` or `.venv\Scripts\python.exe scripts\cleanup.py`
