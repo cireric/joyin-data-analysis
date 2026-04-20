@@ -108,14 +108,14 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None)
         from pdf2docx import Converter
         
         cv = Converter(str(input_path))
-        
-        if pages:
-            cv.convert(str(output_path), pages=pages)
-        else:
-            cv.convert(str(output_path))
-        
-        cv.close()
-        return True
+        try:
+            if pages:
+                cv.convert(str(output_path), pages=pages)
+            else:
+                cv.convert(str(output_path))
+            return True
+        finally:
+            cv.close()
         
     except Exception as e:
         print(f"错误: 转换失败: {e}", file=sys.stderr)
