@@ -1,16 +1,22 @@
 # Data Analysis Project
 
 ## Commands
-- Run analysis: `.venv\Scripts\python.exe data_analysis_202603.py`
+- Run analysis: `make analyze c=PERIOD p=PERIOD`
+  - Yearly: `make analyze c=2026 p=2025`
+  - Quarterly: `make analyze c=2026Q1 p=2025Q1`
+  - Monthly: `make analyze c=2026.03 p=2026.02`
+  - Custom: `make analyze c=2026.04.13~2026.04.19 p=2026.04.06~2026.04.12`
 - Install deps: `.venv\Scripts\pip install -r requirements.txt`
 - Activate venv: `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Unix)
-- Clean up: `.venv\Scripts\python.exe scripts\cleanup.py --dry-run` (preview) or `.venv\Scripts\python.exe scripts\cleanup.py` (execute)
+- Clean up: `make clean` or `.venv\Scripts\python.exe scripts\cleanup.py`
+- Help: `make help`
 
 ## Structure
 - `data/` - Input Excel files
 - `output/` - Generated analysis reports (auto-created)
-- `scripts/` - Utility scripts (cleanup, etc.)
-- Main entry: `data_analysis_202603.py` - reads multi-sheet Excel and generates styled reports with 环比/同比 analysis
+- `scripts/` - Utility scripts (run_analysis.py, cleanup.py)
+- Main entry: `scripts/run_analysis.py` - standalone script with CLI args
+- Makefile: `make analyze c=YYYY.MM p=YYYY.MM`
 
 ## Dependencies
 - pandas, numpy, openpyxl (see requirements.txt)
