@@ -35,6 +35,10 @@ def parse_args():
     parser.add_argument('input', help='输入PDF文件路径')
     parser.add_argument('-o', '--output', help='输出Word文件路径 (默认: 输入文件名.docx)')
     parser.add_argument('--pages', help='页码范围 (如: 1-5, 1,3,5-10)')
+    parser.add_argument('--mode', choices=['normal', 'strict'], default='normal',
+                        help='转换模式: normal(默认, 平衡速度与质量) / strict(严格模式, 更精确)')
+    parser.add_argument('--debug', action='store_true',
+                        help='输出调试信息')
     
     return parser.parse_args()
 
