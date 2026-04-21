@@ -81,31 +81,30 @@ def create_config(args, current_info: PeriodInfo, previous_info: PeriodInfo):
     return config
 
 
-def generate_report_from_config(config):
-    """根据配置生成报表"""
+def load_and_validate(config):
+    """加载数据并验证"""
     data = load_data(config)
     validate_data(data, config['periods'], config['key_column'], config['value_columns'])
-    
-    merged = merge_periods(
-        data, config['periods'], config['key_column'], config['value_columns']
-    )
+    return data
+
+
+def process_data(data, config):
+    """处理数据：合并、填充、计算、添加总计"""
+    merged = merge_periods(data, config['periods'], config['key_column'], config['value_columns'])
     merged = fill_missing_values(merged, config['key_column'], config['value_columns'])
-    
-    result = calculate_analysis(
-        merged, config['value_columns'], config['analysis']
-    )
-    result = add_totals(
-        result, config['key_column'], config['value_columns'], config['analysis']
-    )
-    
+    result = calculate_analysis(merged, config['value_columns'], config['analysis'])
+    result = add_totals(result, config['key_column'], config['value_columns'], config['analysis'])
+    return result
+
+
+def export_report(result, data, config):
+    """导出报表：格式化、样式、保存"""
     reordered_columns = reorder_value_columns(config['value_columns'])
     
     output_cols = [config['key_column']]
     for vc in reordered_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
-        output_cols.extend([
-            f"{col_name}_previous", f"{col_name}_current", f"{col_name}_yoy"
-        ])
+        output_cols.extend([f"{col_name}_previous", f"{col_name}_current", f"{col_name}_yoy"])
     
     result = result[output_cols]
     
@@ -156,6 +155,13 @@ def generate_report_from_config(config):
     wb.save(output_file)
     
     return str(output_file), len(result) - 1, len(group_result) - 1 if group_result is not None else 0
+
+
+def generate_report_from_config(config):
+    """根据配置生成报表"""
+    data = load_and_validate(config)
+    result = process_data(data, config)
+    return export_report(result, data, config)
 
 
 def main():
