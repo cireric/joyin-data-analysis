@@ -206,10 +206,10 @@ def main():
         print(str(e))
         sys.exit(1)
     
-    valid, errors = FileValidator.validate(current_info, previous_info)
-    if not valid:
-        for error in errors:
-            print(error)
+    try:
+        FileValidator.validate(current_info, previous_info)
+    except FileNotFoundError as e:
+        print(f"错误: {e}")
         sys.exit(1)
     
     print(f"数据源: {current_info.file_name}, {previous_info.file_name}")
