@@ -4,7 +4,6 @@
 """
 
 from pathlib import Path
-from typing import List, Tuple
 
 from period_parser import PeriodInfo
 
@@ -15,7 +14,7 @@ class FileValidator:
     DATA_DIR = Path("data")
     
     @classmethod
-    def validate(cls, current: PeriodInfo, previous: PeriodInfo) -> Tuple[bool, List[str]]:
+    def validate(cls, current: PeriodInfo, previous: PeriodInfo) -> None:
         """
         验证数据文件是否存在
         
@@ -23,24 +22,20 @@ class FileValidator:
             current: 当前期信息
             previous: 对比期信息
         
-        Returns:
-            (是否全部存在, 错误信息列表)
+        Raises:
+            FileNotFoundError: 当数据文件不存在时抛出
         """
-        errors = []
-        
         current_path = cls.DATA_DIR / current.file_name
         previous_path = cls.DATA_DIR / previous.file_name
         
         if not current_path.exists():
-            errors.append(f"错误: 未找到当前期数据文件: data/{current.file_name}")
+            raise FileNotFoundError(f"未找到当前期数据文件: data/{current.file_name}")
         
         if not previous_path.exists():
-            errors.append(f"错误: 未找到对比期数据文件: data/{previous.file_name}")
-        
-        return len(errors) == 0, errors
+            raise FileNotFoundError(f"未找到对比期数据文件: data/{previous.file_name}")
     
     @classmethod
-    def get_file_paths(cls, current: PeriodInfo, previous: PeriodInfo) -> Tuple[Path, Path]:
+    def get_file_paths(cls, current: PeriodInfo, previous: PeriodInfo) -> tuple:
         """
         获取数据文件完整路径
         
