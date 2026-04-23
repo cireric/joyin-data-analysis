@@ -38,6 +38,35 @@ class InvalidPageRangeError(PDF2WordError):
     pass
 
 
+PRESETS = {
+    'default': {
+        'multi_processing': True,
+    },
+    'contract': {
+        'multi_processing': False,
+        'parse_lattice_table': True,
+        'parse_stream_table': True,
+        'max_border_width': 3.0,
+        'connected_border_tolerance': 0.3,
+        'line_separate_threshold': 3.0,
+        'min_border_clearance': 1.0,
+    },
+    'table': {
+        'multi_processing': True,
+        'parse_lattice_table': True,
+        'parse_stream_table': True,
+        'float_image_ignorable_gap': 2.0,
+        'extract_stream_table': True,
+    },
+    'text': {
+        'multi_processing': True,
+        'parse_lattice_table': False,
+        'parse_stream_table': False,
+        'new_paragraph_free_space_ratio': 0.7,
+    },
+}
+
+
 def parse_args():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
@@ -49,6 +78,7 @@ def parse_args():
   %(prog)s document.pdf -o result.docx
   %(prog)s document.pdf --pages 1-5
   %(prog)s document.pdf --pages 1,3,5-10
+  %(prog)s document.pdf --preset contract
   %(prog)s document.pdf -o result.docx --force
         '''
     )
@@ -56,8 +86,8 @@ def parse_args():
     parser.add_argument('input', help='输入PDF文件路径')
     parser.add_argument('-o', '--output', help='输出Word文件路径 (默认: 输入文件名.docx)')
     parser.add_argument('--pages', help='页码范围 (如: 1-5, 1,3,5-10)')
-    parser.add_argument('--mode', choices=['normal', 'strict'], default='normal',
-                        help='转换模式: normal(默认, 平衡速度与质量) / strict(严格模式, 更精确)')
+    parser.add_argument('--preset', choices=list(PRESETS.keys()), default='default',
+                        help='预设模式: default(默认), contract(合同), table(表格), text(纯文本)')
     parser.add_argument('--debug', action='store_true',
                         help='输出调试信息')
     parser.add_argument('-f', '--force', action='store_true',
@@ -136,7 +166,7 @@ def parse_page_range(page_str: str) -> list:
 
 
 def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
-                        mode: str = 'normal', debug: bool = False) -> bool:
+                        preset: str = 'default', debug: bool = False) -> bool:
     """
     将PDF转换为Word文档
     
@@ -144,7 +174,7 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
         input_path: 输入PDF文件路径
         output_path: 输出Word文件路径
         pages: 页码列表，None表示全部页面
-        mode: 转换模式，'normal'或'strict'
+        preset: 预设模式名称
         debug: 是否输出调试信息
     
     Returns:
@@ -153,18 +183,8 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
     try:
         from pdf2docx import Converter
         
-        convert_params = {}
-        
-        if mode == 'strict':
-            convert_params = {
-                'multi_processing': False,
-                'debug': debug,
-            }
-        else:
-            convert_params = {
-                'multi_processing': True,
-                'debug': debug,
-            }
+        convert_params = PRESETS.get(preset, PRESETS['default']).copy()
+        convert_params['debug'] = debug
         
         cv = Converter(str(input_path))
         try:
@@ -203,10 +223,10 @@ def main():
     
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    mode_str = "严格模式" if args.mode == 'strict' else "普通模式"
-    print(f"正在转换: {input_path} -> {output_path} ({mode_str})")
+    preset_str = f"预设: {args.preset}" if args.preset != 'default' else ""
+    print(f"正在转换: {input_path} -> {output_path} {preset_str}")
     
-    if convert_pdf_to_docx(input_path, output_path, pages, args.mode, args.debug):
+    if convert_pdf_to_docx(input_path, output_path, pages, args.preset, args.debug):
         print(f"转换完成: {output_path}")
     else:
         sys.exit(1)
