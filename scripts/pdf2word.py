@@ -23,7 +23,7 @@ class PDF2WordError(Exception):
     pass
 
 
-class FileNotFoundError_(PDF2WordError):
+class InputFileNotFoundError(PDF2WordError):
     """文件不存在异常"""
     pass
 
@@ -74,13 +74,13 @@ def validate_input(input_path: str) -> Path:
         Path: 验证后的文件路径
         
     Raises:
-        FileNotFoundError_: 文件不存在
+        InputFileNotFoundError: 文件不存在
         InvalidPDFError: 文件格式错误
     """
     path = Path(input_path)
     
     if not path.exists():
-        raise FileNotFoundError_(f"文件不存在: {input_path}")
+        raise InputFileNotFoundError(f"文件不存在: {input_path}")
     
     if path.suffix.lower() != '.pdf':
         raise InvalidPDFError(f"文件格式错误: 需要PDF文件，当前为 {path.suffix}")
