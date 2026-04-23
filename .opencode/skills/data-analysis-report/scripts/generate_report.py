@@ -395,24 +395,57 @@ def auto_fit_columns(ws):
         ws.column_dimensions[col_letter].width = max(adjusted_width, 8)
 
 
-def style_workbook(ws, value_columns: list, analysis_types: list):
-    """Apply styling to worksheet: header, borders, number formats, total row."""
-    header_fill = PatternFill(start_color='4472C4', fill_type='solid')
-    header_font = Font(bold=True, color='FFFFFF')
-    total_fill = PatternFill(start_color='FFC000', fill_type='solid')
-    total_font = Font(bold=True)
-    thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
-    )
+HEADER_FILL = PatternFill(start_color='4472C4', fill_type='solid')
+HEADER_FONT = Font(bold=True, color='FFFFFF')
+TOTAL_FILL = PatternFill(start_color='FFC000', fill_type='solid')
+TOTAL_FONT = Font(bold=True)
+THIN_BORDER = Border(
+    left=Side(style='thin'),
+    right=Side(style='thin'),
+    top=Side(style='thin'),
+    bottom=Side(style='thin')
+)
 
+
+def apply_header_style(ws):
+    """Apply header styling to first row."""
     for col in range(1, ws.max_column + 1):
         cell = ws.cell(row=1, column=col)
-        cell.fill = header_fill
-        cell.font = header_font
+        cell.fill = HEADER_FILL
+        cell.font = HEADER_FONT
         cell.alignment = Alignment(horizontal='center')
+
+
+def apply_cell_styles(ws, yoy_cols: set, int_cols: set):
+    """Apply cell styling: borders and number formats."""
+    for row in range(2, ws.max_row + 1):
+        for col in range(1, ws.max_column + 1):
+            cell = ws.cell(row=row, column=col)
+            cell.border = THIN_BORDER
+
+            if col in yoy_cols:
+                if cell.value != 'N/A' and cell.value is not None:
+                    cell.number_format = '0.00%'
+                cell.alignment = Alignment(horizontal='center')
+            elif col in int_cols:
+                cell.number_format = '#,##0'
+                cell.alignment = Alignment(horizontal='right')
+            elif col > 1:
+                cell.number_format = '#,##0.00'
+                cell.alignment = Alignment(horizontal='right')
+
+
+def apply_total_row_style(ws):
+    """Apply total row styling to last row."""
+    for col in range(1, ws.max_column + 1):
+        cell = ws.cell(row=ws.max_row, column=col)
+        cell.fill = TOTAL_FILL
+        cell.font = TOTAL_FONT
+
+
+def style_workbook(ws, value_columns: list, analysis_types: list):
+    """Apply styling to worksheet: header, borders, number formats, total row."""
+    apply_header_style(ws)
 
     yoy_cols = set()
     int_cols = set()
@@ -430,48 +463,14 @@ def style_workbook(ws, value_columns: list, analysis_types: list):
             yoy_cols.add(col_idx)
             col_idx += 1
 
-    for row in range(2, ws.max_row + 1):
-        for col in range(1, ws.max_column + 1):
-            cell = ws.cell(row=row, column=col)
-            cell.border = thin_border
-
-            if col in yoy_cols:
-                if cell.value != 'N/A' and cell.value is not None:
-                    cell.number_format = '0.00%'
-                cell.alignment = Alignment(horizontal='center')
-            elif col in int_cols:
-                cell.number_format = '#,##0'
-                cell.alignment = Alignment(horizontal='right')
-            elif col > 1:
-                cell.number_format = '#,##0.00'
-                cell.alignment = Alignment(horizontal='right')
-
-    for col in range(1, ws.max_column + 1):
-        cell = ws.cell(row=ws.max_row, column=col)
-        cell.fill = total_fill
-        cell.font = total_font
-
+    apply_cell_styles(ws, yoy_cols, int_cols)
+    apply_total_row_style(ws)
     auto_fit_columns(ws)
 
 
 def style_group_sheet(ws, metrics: list):
     """Apply styling to group summary sheet."""
-    header_fill = PatternFill(start_color='4472C4', fill_type='solid')
-    header_font = Font(bold=True, color='FFFFFF')
-    total_fill = PatternFill(start_color='FFC000', fill_type='solid')
-    total_font = Font(bold=True)
-    thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
-    )
-
-    for col in range(1, ws.max_column + 1):
-        cell = ws.cell(row=1, column=col)
-        cell.fill = header_fill
-        cell.font = header_font
-        cell.alignment = Alignment(horizontal='center')
+    apply_header_style(ws)
 
     yoy_cols = set()
     int_cols = set()
@@ -487,27 +486,8 @@ def style_group_sheet(ws, metrics: list):
         yoy_cols.add(col_idx)
         col_idx += 1
 
-    for row in range(2, ws.max_row + 1):
-        for col in range(1, ws.max_column + 1):
-            cell = ws.cell(row=row, column=col)
-            cell.border = thin_border
-
-            if col in yoy_cols:
-                if cell.value != 'N/A' and cell.value is not None:
-                    cell.number_format = '0.00%'
-                cell.alignment = Alignment(horizontal='center')
-            elif col in int_cols:
-                cell.number_format = '#,##0'
-                cell.alignment = Alignment(horizontal='right')
-            elif col > 1:
-                cell.number_format = '#,##0.00'
-                cell.alignment = Alignment(horizontal='right')
-
-    for col in range(1, ws.max_column + 1):
-        cell = ws.cell(row=ws.max_row, column=col)
-        cell.fill = total_fill
-        cell.font = total_font
-
+    apply_cell_styles(ws, yoy_cols, int_cols)
+    apply_total_row_style(ws)
     auto_fit_columns(ws)
 
 
