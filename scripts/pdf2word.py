@@ -49,6 +49,7 @@ def parse_args():
   %(prog)s document.pdf -o result.docx
   %(prog)s document.pdf --pages 1-5
   %(prog)s document.pdf --pages 1,3,5-10
+  %(prog)s document.pdf -o result.docx --force
         '''
     )
     
@@ -59,6 +60,8 @@ def parse_args():
                         help='转换模式: normal(默认, 平衡速度与质量) / strict(严格模式, 更精确)')
     parser.add_argument('--debug', action='store_true',
                         help='输出调试信息')
+    parser.add_argument('-f', '--force', action='store_true',
+                        help='强制覆盖已存在的输出文件')
     
     return parser.parse_args()
 
@@ -192,6 +195,13 @@ def main():
         output_path = Path(args.output)
     else:
         output_path = input_path.with_suffix('.docx')
+    
+    if output_path.exists() and not args.force:
+        print(f"错误: 输出文件已存在: {output_path}", file=sys.stderr)
+        print(f"提示: 使用 --force 参数强制覆盖", file=sys.stderr)
+        sys.exit(1)
+    
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     
     mode_str = "严格模式" if args.mode == 'strict' else "普通模式"
     print(f"正在转换: {input_path} -> {output_path} ({mode_str})")
