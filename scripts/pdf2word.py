@@ -207,8 +207,9 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
     convert_params = PRESETS.get(preset, PRESETS['default']).copy()
     convert_params['debug'] = debug
     
-    cv = Converter(str(input_path))
+    cv = None
     try:
+        cv = Converter(str(input_path))
         if pages:
             cv.convert(str(output_path), pages=pages, **convert_params)
         else:
@@ -217,7 +218,8 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
     except Exception as e:
         raise ConversionError(f"转换失败: {e}")
     finally:
-        cv.close()
+        if cv:
+            cv.close()
 
 
 def main():

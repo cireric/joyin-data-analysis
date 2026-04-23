@@ -21,7 +21,7 @@ value_columns:               # Columns to analyze
   - name: 线下杯数
   - name: 线上金额
   - name: 线下金额
-  - name: 测试杯数
+  - name: 测试杯
 
 # Period configuration
 periods:
