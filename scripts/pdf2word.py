@@ -18,6 +18,26 @@ except AttributeError:
     pass
 
 
+class PDF2WordError(Exception):
+    """PDF转Word工具基础异常"""
+    pass
+
+
+class FileNotFoundError_(PDF2WordError):
+    """文件不存在异常"""
+    pass
+
+
+class InvalidPDFError(PDF2WordError):
+    """无效PDF文件异常"""
+    pass
+
+
+class InvalidPageRangeError(PDF2WordError):
+    """无效页码范围异常"""
+    pass
+
+
 def parse_args():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(
@@ -44,16 +64,26 @@ def parse_args():
 
 
 def validate_input(input_path: str) -> Path:
-    """验证输入文件"""
+    """
+    验证输入文件
+    
+    Args:
+        input_path: 输入文件路径
+        
+    Returns:
+        Path: 验证后的文件路径
+        
+    Raises:
+        FileNotFoundError_: 文件不存在
+        InvalidPDFError: 文件格式错误
+    """
     path = Path(input_path)
     
     if not path.exists():
-        print(f"错误: 文件不存在: {input_path}", file=sys.stderr)
-        sys.exit(1)
+        raise FileNotFoundError_(f"文件不存在: {input_path}")
     
     if path.suffix.lower() != '.pdf':
-        print(f"错误: 文件格式错误: 需要PDF文件", file=sys.stderr)
-        sys.exit(1)
+        raise InvalidPDFError(f"文件格式错误: 需要PDF文件，当前为 {path.suffix}")
     
     return path
 
@@ -66,6 +96,15 @@ def parse_page_range(page_str: str) -> list:
         1-5      -> [1, 2, 3, 4, 5]
         1,3,5    -> [1, 3, 5]
         1-3,5,7-9 -> [1, 2, 3, 5, 7, 8, 9]
+    
+    Args:
+        page_str: 页码范围字符串
+        
+    Returns:
+        排序后的页码列表，None表示全部页面
+        
+    Raises:
+        InvalidPageRangeError: 页码范围无效
     """
     if not page_str:
         return None
@@ -80,18 +119,15 @@ def parse_page_range(page_str: str) -> list:
                 start, end = part.split('-')
                 start, end = int(start.strip()), int(end.strip())
                 if start > end:
-                    print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
-                    sys.exit(1)
+                    raise InvalidPageRangeError(f"页码范围无效: {page_str} (起始页 {start} 大于结束页 {end})")
                 pages.update(range(start, end + 1))
             except ValueError:
-                print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
-                sys.exit(1)
+                raise InvalidPageRangeError(f"页码范围无效: {page_str}")
         else:
             try:
                 pages.add(int(part))
             except ValueError:
-                print(f"错误: 页码范围无效: {page_str}", file=sys.stderr)
-                sys.exit(1)
+                raise InvalidPageRangeError(f"页码范围无效: {page_str}")
     
     return sorted(pages)
 
@@ -144,8 +180,13 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
 
 def main():
     args = parse_args()
-    input_path = validate_input(args.input)
-    pages = parse_page_range(args.pages)
+    
+    try:
+        input_path = validate_input(args.input)
+        pages = parse_page_range(args.pages)
+    except PDF2WordError as e:
+        print(f"错误: {e}", file=sys.stderr)
+        sys.exit(1)
     
     if args.output:
         output_path = Path(args.output)
