@@ -12,7 +12,10 @@ import sys
 from pathlib import Path
 from datetime import datetime, timedelta
 
-sys.stdout.reconfigure(encoding='utf-8')
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 
 
 def clean_project(keep_recent_days: int = 0, dry_run: bool = False):

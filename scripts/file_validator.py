@@ -11,7 +11,7 @@ from period_parser import PeriodInfo
 class FileValidator:
     """数据文件验证器"""
     
-    DATA_DIR = Path("data")
+    DATA_DIR = Path(__file__).parent.parent / "data"
     
     @classmethod
     def validate(cls, current: PeriodInfo, previous: PeriodInfo) -> None:

@@ -38,6 +38,16 @@ class InvalidPageRangeError(PDF2WordError):
     pass
 
 
+class ConversionError(PDF2WordError):
+    """PDF转换异常"""
+    pass
+
+
+class DependencyError(PDF2WordError):
+    """依赖缺失异常"""
+    pass
+
+
 PRESETS = {
     'default': {
         'multi_processing': True,
@@ -151,6 +161,8 @@ def parse_page_range(page_str: str) -> list:
             try:
                 start, end = part.split('-')
                 start, end = int(start.strip()), int(end.strip())
+                if start < 1 or end < 1:
+                    raise InvalidPageRangeError(f"页码必须为正整数: {page_str}")
                 if start > end:
                     raise InvalidPageRangeError(f"页码范围无效: {page_str} (起始页 {start} 大于结束页 {end})")
                 pages.update(range(start, end + 1))
@@ -158,7 +170,10 @@ def parse_page_range(page_str: str) -> list:
                 raise InvalidPageRangeError(f"页码范围无效: {page_str}")
         else:
             try:
-                pages.add(int(part))
+                page_num = int(part)
+                if page_num < 1:
+                    raise InvalidPageRangeError(f"页码必须为正整数: {page_str}")
+                pages.add(page_num)
             except ValueError:
                 raise InvalidPageRangeError(f"页码范围无效: {page_str}")
     
@@ -179,26 +194,30 @@ def convert_pdf_to_docx(input_path: Path, output_path: Path, pages: list = None,
     
     Returns:
         True if successful, False otherwise
+    
+    Raises:
+        DependencyError: pdf2docx 未安装
+        ConversionError: 转换过程出错
     """
     try:
         from pdf2docx import Converter
-        
-        convert_params = PRESETS.get(preset, PRESETS['default']).copy()
-        convert_params['debug'] = debug
-        
-        cv = Converter(str(input_path))
-        try:
-            if pages:
-                cv.convert(str(output_path), pages=pages, **convert_params)
-            else:
-                cv.convert(str(output_path), **convert_params)
-            return True
-        finally:
-            cv.close()
-        
+    except ImportError:
+        raise DependencyError("pdf2docx 未安装，请运行: pip install pdf2docx")
+    
+    convert_params = PRESETS.get(preset, PRESETS['default']).copy()
+    convert_params['debug'] = debug
+    
+    cv = Converter(str(input_path))
+    try:
+        if pages:
+            cv.convert(str(output_path), pages=pages, **convert_params)
+        else:
+            cv.convert(str(output_path), **convert_params)
+        return True
     except Exception as e:
-        print(f"错误: 转换失败: {e}", file=sys.stderr)
-        return False
+        raise ConversionError(f"转换失败: {e}")
+    finally:
+        cv.close()
 
 
 def main():
@@ -226,9 +245,11 @@ def main():
     preset_str = f"预设: {args.preset}" if args.preset != 'default' else ""
     print(f"正在转换: {input_path} -> {output_path} {preset_str}")
     
-    if convert_pdf_to_docx(input_path, output_path, pages, args.preset, args.debug):
+    try:
+        convert_pdf_to_docx(input_path, output_path, pages, args.preset, args.debug)
         print(f"转换完成: {output_path}")
-    else:
+    except PDF2WordError as e:
+        print(f"错误: {e}", file=sys.stderr)
         sys.exit(1)
 
 
