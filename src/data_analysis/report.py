@@ -175,6 +175,23 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
 
     supervisor_data = supervisor_data[output_cols]
 
+    totals = {key_column: '总计'}
+    for vc in value_columns:
+        col_name = vc['name'] if isinstance(vc, dict) else vc
+        prev_col = f"{col_name}_previous"
+        curr_col = f"{col_name}_current"
+        
+        prev_total = supervisor_data[prev_col].sum()
+        curr_total = supervisor_data[curr_col].sum()
+        
+        totals[prev_col] = prev_total
+        totals[curr_col] = curr_total
+        
+        if 'yoy' in analysis_types:
+            totals[f"{col_name}_yoy"] = calc_comparison(curr_total, prev_total)
+    
+    supervisor_data = pd.concat([supervisor_data, pd.DataFrame([totals])], ignore_index=True)
+
     rename_map = {key_column: key_column}
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
