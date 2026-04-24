@@ -20,14 +20,8 @@
 - Makefile: `make analyze c=YYYY.MM p=YYYY.MM`
 
 ## Dependencies
-- pandas, numpy, openpyxl (see requirements.txt)
+- pandas, numpy, openpyxl, pdf2docx (see requirements.txt)
 - Virtual environment: `.venv/` (create with `python -m venv .venv` if missing)
-
-## Skills
-- `data-analysis-report` - Generate styled Excel analysis reports from multi-period data
-  - Trigger: "分析数据", "生成报表", "同比分析", "汇总统计"
-  - Supports: multi-sheet/multi-file Excel, YoY/MoM comparison
-  - Location: `.opencode/skills/data-analysis-report/`
 
 ## Code Style
 - All files must use UTF-8 encoding

@@ -109,74 +109,12 @@ data_analysis/
 │   ├── file_validator.py# 文件验证
 │   ├── pdf2word.py     # PDF转Word
 │   └── cleanup.py      # 清理脚本
+├── tests/              # 单元测试
 ├── docs/               # 文档
-├── .opencode/          # OpenCode Skills
-│   └── skills/
-│       └── data-analysis-report/
 ├── Makefile            # Make 命令
 ├── requirements.txt
 └── AGENTS.md           # 项目配置
 ```
-
-## Skill: data-analysis-report
-
-内置数据分析Skill，支持配置驱动的报表生成。
-
-### 使用方式
-
-```
-用户: 分析这份销售数据 @data.xlsx
-```
-
-AI会自动：
-1. 读取数据结构
-2. 生成配置
-3. 确认后执行
-4. 输出样式化报表
-
-### 配置示例
-
-```yaml
-data_source:
-  type: multi_file
-  files:
-    - ./data/销售汇总表-2026.03.xlsx
-    - ./data/销售汇总表-2026.02.xlsx
-
-key_column: 点位名称
-value_columns:
-  - name: 总杯数
-  - name: 总金额
-
-periods:
-  current: '2026.03'
-  previous: '2026.02'
-  current_file: '销售汇总表-2026.03'
-  previous_file: '销售汇总表-2026.02'
-
-analysis: [yoy]
-
-group_by:
-  column: 督导人员
-  sheet_name: 督导人员汇总
-  metrics: auto
-  null_handling: ignore
-
-output:
-  dir: ./output
-  title: 月度销售环比分析
-```
-
-### 配置说明
-
-| 字段 | 说明 |
-|------|------|
-| `data_source.type` | `multi_sheet` 或 `multi_file` |
-| `key_column` | 合并键列 |
-| `value_columns` | 分析指标列 |
-| `periods.current/previous` | 时期标签 |
-| `group_by.column` | 分组列（可选） |
-| `group_by.metrics` | `auto`=智能筛选含"总"的指标 |
 
 ## 依赖
 
