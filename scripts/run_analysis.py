@@ -130,12 +130,14 @@ def main():
     
     print(f"正在生成报表: {previous_info.label} vs {current_info.label}")
     
-    output_file, point_count, group_count = generate_report(config)
+    output_file, point_count, group_count, supervisor_count = generate_report(config)
     
     print(f"报表已生成: {output_file}")
     print(f"点位数量: {point_count}")
     if group_count > 0:
         print(f"分组汇总: {group_count} 条")
+    if supervisor_count > 0:
+        print(f"督导详细页: {supervisor_count} 个")
 
 
 if __name__ == '__main__':

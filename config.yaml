@@ -1,0 +1,34 @@
+data_source:
+  type: multi_file
+  files:
+    - ./data/销售汇总表-2026.03.xlsx
+    - ./data/销售汇总表-2026.02.xlsx
+
+key_column: 点位名称
+value_columns:
+  - name: 总杯数
+  - name: 总金额
+  - name: 线上杯数
+  - name: 线下杯数
+  - name: 线上金额
+  - name: 线下金额
+  - name: 测试杯
+
+periods:
+  current: '2026.03'
+  previous: '2026.02'
+  current_file: '销售汇总表-2026.03'
+  previous_file: '销售汇总表-2026.02'
+
+analysis:
+  - yoy
+
+output:
+  dir: ./output
+  title: 月度销售环比分析
+
+group_by:
+  column: 督导人员
+  sheet_name: 督导人员汇总
+  metrics: auto
+  null_handling: ignore

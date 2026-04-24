@@ -135,6 +135,60 @@ def generate_group_summary(data: dict, periods: dict, group_config: dict,
     return result
 
 
+def generate_supervisor_detail(result: pd.DataFrame, group_col: str, 
+                               supervisor: str, key_column: str,
+                               value_columns: list, analysis_types: list,
+                               periods: dict) -> pd.DataFrame:
+    """
+    Generate detail sheet for a single supervisor.
+    
+    Args:
+        result: Full analysis result DataFrame
+        group_col: Group column name (e.g., 督导人员)
+        supervisor: Supervisor name to filter
+        key_column: Key column name
+        value_columns: List of value column configs
+        analysis_types: List of analysis types
+        periods: Period labels
+        
+    Returns:
+        Filtered DataFrame for the supervisor
+    """
+    if group_col not in result.columns:
+        return None
+    
+    supervisor_data = result[result[group_col] == supervisor].copy()
+    
+    if supervisor_data.empty:
+        return None
+    
+    reordered_columns = reorder_value_columns(value_columns)
+
+    output_cols = [key_column]
+    for vc in reordered_columns:
+        col_name = vc['name'] if isinstance(vc, dict) else vc
+        output_cols.extend([
+            f"{col_name}_previous",
+            f"{col_name}_current",
+            f"{col_name}_yoy"
+        ])
+
+    supervisor_data = supervisor_data[output_cols]
+
+    rename_map = {key_column: key_column}
+    for vc in value_columns:
+        col_name = vc['name'] if isinstance(vc, dict) else vc
+        prev_label = periods['previous']
+        curr_label = periods['current']
+        rename_map[f"{col_name}_previous"] = f"{prev_label}{col_name}"
+        rename_map[f"{col_name}_current"] = f"{curr_label}{col_name}"
+        rename_map[f"{col_name}_yoy"] = f"{col_name}同比"
+
+    supervisor_data.rename(columns=rename_map, inplace=True)
+
+    return supervisor_data
+
+
 def generate_report(config: dict, data: dict = None) -> tuple:
     """
     Generate Excel report from configuration.
@@ -156,12 +210,27 @@ def generate_report(config: dict, data: dict = None) -> tuple:
     
     merged = merge_periods(data, config['periods'], config['key_column'], config['value_columns'])
     merged = fill_missing_values(merged, config['key_column'], config['value_columns'])
+    
+    group_col = None
+    if 'group_by' in config and config['group_by']:
+        group_col = config['group_by']['column']
+        if group_col and group_col not in merged.columns:
+            current_df = data[config['periods']['current']]
+            if group_col in current_df.columns:
+                merged = merged.merge(
+                    current_df[[config['key_column'], group_col]],
+                    on=config['key_column'],
+                    how='left'
+                )
+    
     result = calculate_analysis(merged, config['value_columns'], config['analysis'])
     result = add_totals(result, config['key_column'], config['value_columns'], config['analysis'])
     
     reordered_columns = reorder_value_columns(config['value_columns'])
 
     output_cols = [config['key_column']]
+    if group_col and group_col in result.columns:
+        output_cols.append(group_col)
     for vc in reordered_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
         output_cols.extend([
@@ -170,7 +239,9 @@ def generate_report(config: dict, data: dict = None) -> tuple:
             f"{col_name}_yoy"
         ])
 
-    result = result[output_cols]
+    result_for_output = result[output_cols].copy()
+    if group_col and group_col in result_for_output.columns:
+        result_for_output = result_for_output.drop(columns=[group_col])
 
     rename_map = {config['key_column']: config['key_column']}
     for vc in config['value_columns']:
@@ -181,18 +252,19 @@ def generate_report(config: dict, data: dict = None) -> tuple:
         rename_map[f"{col_name}_current"] = f"{curr_label}{col_name}"
         rename_map[f"{col_name}_yoy"] = f"{col_name}同比"
 
-    result.rename(columns=rename_map, inplace=True)
+    result_for_output.rename(columns=rename_map, inplace=True)
 
     wb = Workbook()
     ws = wb.active
     ws.title = config['output']['title']
 
-    for r in dataframe_to_rows(result, index=False, header=True):
+    for r in dataframe_to_rows(result_for_output, index=False, header=True):
         ws.append(r)
 
     style_workbook(ws, reordered_columns, config['analysis'])
 
     group_result = None
+    supervisor_count = 0
     if 'group_by' in config and config['group_by']:
         group_config = config['group_by']
         group_col = group_config['column']
@@ -208,6 +280,22 @@ def generate_report(config: dict, data: dict = None) -> tuple:
             ws2.append(r)
 
         style_group_sheet(ws2, metrics)
+        
+        supervisors = group_result[group_col].iloc[:-1].tolist()
+        supervisors = [s for s in supervisors if pd.notna(s)]
+        
+        for supervisor in supervisors:
+            supervisor_data = generate_supervisor_detail(
+                merged, group_col, supervisor, config['key_column'],
+                config['value_columns'], config['analysis'], config['periods']
+            )
+            
+            if supervisor_data is not None and not supervisor_data.empty:
+                ws_detail = wb.create_sheet(str(supervisor))
+                for r in dataframe_to_rows(supervisor_data, index=False, header=True):
+                    ws_detail.append(r)
+                style_workbook(ws_detail, reordered_columns, config['analysis'])
+                supervisor_count += 1
 
     date_dir = datetime.now().strftime('%Y%m%d')
     output_dir = Path(config['output']['dir']) / date_dir
@@ -217,4 +305,4 @@ def generate_report(config: dict, data: dict = None) -> tuple:
     output_file = output_dir / f"{safe_title}_{time_str}.xlsx"
     wb.save(output_file)
 
-    return str(output_file), len(result) - 1, len(group_result) - 1 if group_result is not None else 0
+    return str(output_file), len(result) - 1, len(group_result) - 1 if group_result is not None else 0, supervisor_count
