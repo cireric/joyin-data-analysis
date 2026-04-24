@@ -15,8 +15,16 @@
 ## Structure
 - `data/` - Input Excel files
 - `output/` - Generated analysis reports (auto-created)
-- `scripts/` - Utility scripts (run_analysis.py, cleanup.py)
-- Main entry: `scripts/run_analysis.py` - standalone script with CLI args
+- `src/data_analysis/` - Core library modules
+  - `loader.py` - Data loading and validation
+  - `analyzer.py` - Data analysis functions
+  - `report.py` - Report generation
+  - `styler.py` - Excel styling
+- `scripts/` - CLI entry points
+  - `run_analysis.py` - Main analysis script
+  - `pdf2word.py` - PDF to Word converter
+  - `cleanup.py` - Output cleanup
+- `tests/` - Unit tests
 - Makefile: `make analyze c=YYYY.MM p=YYYY.MM`
 
 ## Dependencies

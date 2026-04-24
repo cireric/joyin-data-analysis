@@ -103,10 +103,13 @@ data_analysis/
 ├── data/               # 输入Excel文件
 │   └── 销售汇总表-*.xlsx
 ├── output/             # 输出报表（按日期分组）
-├── scripts/            # 工具脚本
+├── src/data_analysis/  # 核心库模块
+│   ├── loader.py       # 数据加载与验证
+│   ├── analyzer.py     # 数据分析函数
+│   ├── report.py       # 报表生成
+│   └── styler.py       # Excel样式
+├── scripts/            # CLI入口脚本
 │   ├── run_analysis.py # 主分析脚本
-│   ├── period_parser.py# 周期类型识别
-│   ├── file_validator.py# 文件验证
 │   ├── pdf2word.py     # PDF转Word
 │   └── cleanup.py      # 清理脚本
 ├── tests/              # 单元测试

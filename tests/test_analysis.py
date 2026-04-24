@@ -6,12 +6,12 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / '.opencode' / 'skills' / 'data-analysis-report' / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 import pytest
 import pandas as pd
 import numpy as np
-from generate_report import calc_comparison
+from data_analysis.analyzer import calc_comparison
 
 
 class TestCalcComparison:
