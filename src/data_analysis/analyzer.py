@@ -134,4 +134,7 @@ def add_totals(df: pd.DataFrame, key_column: str,
         if 'yoy' in analysis_types:
             totals[f"{col_name}_yoy"] = calc_comparison(current_total, previous_total)
 
+    point_count = len(df)
+    totals[key_column] = f'总计（{point_count}台）'
+
     return pd.concat([df, pd.DataFrame([totals])], ignore_index=True)

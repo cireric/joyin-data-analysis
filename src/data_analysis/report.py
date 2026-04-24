@@ -175,7 +175,8 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
 
     supervisor_data = supervisor_data[output_cols]
 
-    totals = {key_column: '总计'}
+    point_count = len(supervisor_data)
+    totals = {key_column: f'总计（{point_count}台）'}
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
         prev_col = f"{col_name}_previous"
