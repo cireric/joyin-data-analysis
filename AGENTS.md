@@ -7,6 +7,7 @@
   - Monthly: `make analyze c=2026.03 p=2026.02`
   - Custom: `make analyze c=2026.04.13~2026.04.19 p=2026.04.06~2026.04.12`
 - PDF to Word: `python scripts/pdf2word.py input.pdf [-o output.docx] [--pages 1-5] [--preset contract] [--force] [--debug]`
+- Markdown to Word: `python scripts/md2word.py input.md [-o output.docx] [--reference-docx template.docx] [--toc] [--force]`
 - Install deps: `.venv\Scripts\pip install -r requirements.txt`
 - Activate venv: `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Unix)
 - Clean up: `make clean` or `.venv\Scripts\python.exe scripts\cleanup.py`
@@ -23,12 +24,13 @@
 - `scripts/` - CLI entry points
   - `run_analysis.py` - Main analysis script
   - `pdf2word.py` - PDF to Word converter
+  - `md2word.py` - Markdown to Word converter
   - `cleanup.py` - Output cleanup
 - `tests/` - Unit tests
 - Makefile: `make analyze c=YYYY.MM p=YYYY.MM`
 
 ## Dependencies
-- pandas, numpy, openpyxl, pdf2docx (see requirements.txt)
+- pandas, numpy, openpyxl, pdf2docx, pypandoc (see requirements.txt)
 - Virtual environment: `.venv/` (create with `python -m venv .venv` if missing)
 
 ## Code Style
@@ -37,6 +39,15 @@
   - Remove trailing whitespace
   - Ensure consistent indentation
   - Remove extra blank lines
+
+## MCP Tools
+- When you need to search documentation for any library (PHP, Python, JavaScript, etc.), use `context7` tools.
+- When you need to search real-world code examples from GitHub, use `gh_grep` tools.
+- When you need to capture, analyze, or interact with web pages, use `playwright` tools.
+- When you need to analyze images, screenshots, UI designs, diagrams, charts, or videos, use `vision` tools (e.g. `vision_image_analysis`, `vision_extract_text_from_screenshot`, `vision_ui_to_artifact`, `vision_diagnose_error_screenshot`, etc.).
+
+## Security Rules
+- All file operations (read, write, edit) must be restricted to the project directory (`D:\Project\source\__TEST__\data_analysis\`) — accessing or modifying files outside this path is prohibited.
 
 ## Workflow
 - After writing code, verify by running the script and checking output
