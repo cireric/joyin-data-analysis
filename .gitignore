@@ -32,3 +32,11 @@ Thumbs.db
 *.tmp
 *.temp
 ~$*.xlsx
+
+# Testing
+.pytest_cache/
+
+# Playwright MCP
+.playwright-mcp/
+
+misc/

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 清理项目无用文件
-- 清除 Python 缓存 (__pycache__, *.pyc)
+- 清除 Python 缓存 (__pycache__, *.pyc, *.pyo, *.egg-info)
+- 清除测试缓存 (.pytest_cache, .coverage, htmlcov)
+- 清除工具缓存 (.playwright-mcp, .ipynb_checkpoints)
+- 清除临时文件 (*.tmp, *.temp, ~$*.xlsx)
 - 清除输出报表 (output/ 目录)
 - 可选保留最近N天的报表
 """
@@ -95,6 +98,86 @@ def clean_project(keep_recent_days: int = 0, dry_run: bool = False):
             success, error = _delete_item(pyc, dry_run)
             if success:
                 deleted.append(str(pyc))
+            elif error:
+                skipped.append(error)
+
+    for pyo in project_root.rglob("*.pyo"):
+        if ".venv" not in str(pyo):
+            success, error = _delete_item(pyo, dry_run)
+            if success:
+                deleted.append(str(pyo))
+            elif error:
+                skipped.append(error)
+
+    for egg_info in project_root.rglob("*.egg-info"):
+        if ".venv" not in str(egg_info):
+            success, error = _delete_item(egg_info, dry_run)
+            if success:
+                deleted.append(str(egg_info))
+            elif error:
+                skipped.append(error)
+
+    pytest_cache = project_root / ".pytest_cache"
+    if pytest_cache.exists():
+        success, error = _delete_item(pytest_cache, dry_run)
+        if success:
+            deleted.append(str(pytest_cache))
+        elif error:
+            skipped.append(error)
+
+    coverage_file = project_root / ".coverage"
+    if coverage_file.exists():
+        success, error = _delete_item(coverage_file, dry_run)
+        if success:
+            deleted.append(str(coverage_file))
+        elif error:
+            skipped.append(error)
+
+    htmlcov_dir = project_root / "htmlcov"
+    if htmlcov_dir.exists():
+        success, error = _delete_item(htmlcov_dir, dry_run)
+        if success:
+            deleted.append(str(htmlcov_dir))
+        elif error:
+            skipped.append(error)
+
+    playwright_mcp = project_root / ".playwright-mcp"
+    if playwright_mcp.exists():
+        success, error = _delete_item(playwright_mcp, dry_run)
+        if success:
+            deleted.append(str(playwright_mcp))
+        elif error:
+            skipped.append(error)
+
+    for ipynb_checkpoint in project_root.rglob(".ipynb_checkpoints"):
+        if ".venv" not in str(ipynb_checkpoint):
+            success, error = _delete_item(ipynb_checkpoint, dry_run)
+            if success:
+                deleted.append(str(ipynb_checkpoint))
+            elif error:
+                skipped.append(error)
+
+    for tmp_file in project_root.rglob("*.tmp"):
+        if ".venv" not in str(tmp_file):
+            success, error = _delete_item(tmp_file, dry_run)
+            if success:
+                deleted.append(str(tmp_file))
+            elif error:
+                skipped.append(error)
+
+    for temp_file in project_root.rglob("*.temp"):
+        if ".venv" not in str(temp_file):
+            success, error = _delete_item(temp_file, dry_run)
+            if success:
+                deleted.append(str(temp_file))
+            elif error:
+                skipped.append(error)
+
+    for excel_tmp in project_root.rglob("~$*.xlsx"):
+        if ".venv" not in str(excel_tmp):
+            success, error = _delete_item(excel_tmp, dry_run)
+            if success:
+                deleted.append(str(excel_tmp))
             elif error:
                 skipped.append(error)
 
