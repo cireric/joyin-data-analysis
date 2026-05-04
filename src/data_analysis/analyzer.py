@@ -104,6 +104,26 @@ def calculate_analysis(df: pd.DataFrame, value_columns: list,
     return df
 
 
+def merge_maintenance_counts(
+    df: pd.DataFrame,
+    maintenance_counts: dict,
+    key_column: str
+) -> pd.DataFrame:
+    """
+    Merge maintenance counts into analysis DataFrame.
+
+    Args:
+        df: Analysis DataFrame
+        maintenance_counts: Dict mapping point name to maintenance count
+        key_column: Name of key column (point name)
+
+    Returns:
+        DataFrame with '运维次数' column added
+    """
+    df['运维次数'] = df[key_column].map(maintenance_counts).fillna(0).astype(int)
+    return df
+
+
 def add_totals(df: pd.DataFrame, key_column: str, 
                value_columns: list, analysis_types: list) -> pd.DataFrame:
     """

@@ -108,6 +108,7 @@ def main():
     parser.add_argument('--columns', nargs='+', default=DEFAULT_VALUE_COLUMNS,
                         help=f'分析列 (默认: {DEFAULT_VALUE_COLUMNS})')
     parser.add_argument('-t', '--title', help='报表标题')
+    parser.add_argument('-m', '--maintenance', help='兼职运维表路径 (可选)')
     
     args = parser.parse_args()
     
@@ -130,7 +131,12 @@ def main():
     
     print(f"正在生成报表: {previous_info.label} vs {current_info.label}")
     
-    output_file, point_count, group_count, supervisor_count = generate_report(config)
+    if args.maintenance:
+        print(f"运维数据: {args.maintenance}")
+    
+    output_file, point_count, group_count, supervisor_count, unmatched_count = generate_report(
+        config, maintenance_file=args.maintenance
+    )
     
     print(f"报表已生成: {output_file}")
     print(f"点位数量: {point_count}")
@@ -138,6 +144,8 @@ def main():
         print(f"分组汇总: {group_count} 条")
     if supervisor_count > 0:
         print(f"督导详细页: {supervisor_count} 个")
+    if unmatched_count > 0:
+        print(f"待确认运维: {unmatched_count} 条")
 
 
 if __name__ == '__main__':

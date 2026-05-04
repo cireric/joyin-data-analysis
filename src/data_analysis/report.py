@@ -207,19 +207,21 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
     return supervisor_data
 
 
-def generate_report(config: dict, data: dict = None) -> tuple:
+def generate_report(config: dict, data: dict = None, maintenance_file: str = None) -> tuple:
     """
     Generate Excel report from configuration.
     
     Args:
         config: Configuration dictionary
         data: Pre-loaded data (optional, will load if not provided)
+        maintenance_file: Path to maintenance Excel file (optional)
         
     Returns:
-        Tuple of (output_file_path, point_count, group_count)
+        Tuple of (output_file_path, point_count, group_count, supervisor_count, unmatched_count)
     """
     from .loader import load_data, validate_data
-    from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals
+    from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals, merge_maintenance_counts
+    from .maintenance import process_maintenance_data
     
     if data is None:
         data = load_data(config)
@@ -228,6 +230,24 @@ def generate_report(config: dict, data: dict = None) -> tuple:
     
     merged = merge_periods(data, config['periods'], config['key_column'], config['value_columns'])
     merged = fill_missing_values(merged, config['key_column'], config['value_columns'])
+    
+    maintenance_counts = {}
+    unmatched_df = None
+    unmatched_count = 0
+    
+    if maintenance_file:
+        current_df = data[config['periods']['current']]
+        code_col = '机器编号'
+        if code_col in current_df.columns:
+            maintenance_counts, unmatched_df = process_maintenance_data(
+                maintenance_file,
+                current_df,
+                site_col=config.get('maintenance', {}).get('site_column', '站点名称'),
+                code_col=code_col,
+                name_col=config['key_column']
+            )
+            if unmatched_df is not None:
+                unmatched_count = len(unmatched_df)
     
     group_col = None
     if 'group_by' in config and config['group_by']:
@@ -242,6 +262,10 @@ def generate_report(config: dict, data: dict = None) -> tuple:
                 )
     
     result = calculate_analysis(merged, config['value_columns'], config['analysis'])
+    
+    if maintenance_counts:
+        result = merge_maintenance_counts(result, maintenance_counts, config['key_column'])
+    
     result = add_totals(result, config['key_column'], config['value_columns'], config['analysis'])
     
     reordered_columns = reorder_value_columns(config['value_columns'])
@@ -256,6 +280,8 @@ def generate_report(config: dict, data: dict = None) -> tuple:
             f"{col_name}_current",
             f"{col_name}_yoy"
         ])
+    if maintenance_file:
+        output_cols.append('运维次数')
 
     result_for_output = result[output_cols].copy()
     if group_col and group_col in result_for_output.columns:
@@ -315,6 +341,11 @@ def generate_report(config: dict, data: dict = None) -> tuple:
                 style_workbook(ws_detail, reordered_columns, config['analysis'])
                 supervisor_count += 1
 
+    if unmatched_df is not None and not unmatched_df.empty:
+        ws_unmatched = wb.create_sheet('待确认运维')
+        for r in dataframe_to_rows(unmatched_df, index=False, header=True):
+            ws_unmatched.append(r)
+
     date_dir = datetime.now().strftime('%Y%m%d')
     output_dir = Path(config['output']['dir']) / date_dir
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -323,4 +354,4 @@ def generate_report(config: dict, data: dict = None) -> tuple:
     output_file = output_dir / f"{safe_title}_{time_str}.xlsx"
     wb.save(output_file)
 
-    return str(output_file), len(result) - 1, len(group_result) - 1 if group_result is not None else 0, supervisor_count
+    return str(output_file), len(result) - 1, len(group_result) - 1 if group_result is not None else 0, supervisor_count, unmatched_count
