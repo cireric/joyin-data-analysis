@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 import pytest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from src.data_crawl.utils import (
     random_delay,
     sanitize_filename,
@@ -77,3 +77,49 @@ class TestStateManagement:
     def test_load_state_file_not_exists(self):
         result = load_state("/nonexistent/path/state.json")
         assert result is None
+
+
+from src.data_crawl.browser import create_browser_context, BrowserManager
+
+
+class TestBrowserManager:
+    @pytest.mark.asyncio
+    async def test_create_browser_context(self):
+        with patch('src.data_crawl.browser.async_playwright') as mock_pw:
+            mock_playwright = AsyncMock()
+            mock_browser = AsyncMock()
+            mock_context = AsyncMock()
+            
+            mock_pw_instance = AsyncMock()
+            mock_pw_instance.start = AsyncMock(return_value=mock_playwright)
+            mock_pw.return_value = mock_pw_instance
+            
+            mock_playwright.chromium.launch.return_value = mock_browser
+            mock_browser.new_context.return_value = mock_context
+            
+            manager = BrowserManager()
+            context = await manager.create_context()
+            
+            assert context is not None
+            mock_browser.new_context.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_browser_context_has_user_agent(self):
+        with patch('src.data_crawl.browser.async_playwright') as mock_pw:
+            mock_playwright = AsyncMock()
+            mock_browser = AsyncMock()
+            mock_context = AsyncMock()
+            
+            mock_pw_instance = AsyncMock()
+            mock_pw_instance.start = AsyncMock(return_value=mock_playwright)
+            mock_pw.return_value = mock_pw_instance
+            
+            mock_playwright.chromium.launch.return_value = mock_browser
+            mock_browser.new_context.return_value = mock_context
+            
+            manager = BrowserManager()
+            await manager.create_context()
+            
+            call_kwargs = mock_browser.new_context.call_args[1]
+            assert 'user_agent' in call_kwargs
+            assert 'Mozilla' in call_kwargs['user_agent']
