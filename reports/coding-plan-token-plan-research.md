@@ -9,8 +9,8 @@
 
 1. [术语说明](#术语说明)
 2. [核心选购建议](#核心选购建议)
-3. [国外御三家](#国外御三家)
-4. [国内厂商 Coding Plan](#国内厂商-coding-plan)
+3. [国内厂商 Coding Plan](#国内厂商-coding-plan)
+4. [国外御三家](#国外御三家)
 5. [国外平台与服务](#国外平台与服务)
 6. [按用量计费方案](#按用量计费方案)
 7. [AI IDE/CLI Plan](#ai-idecli-plan)
@@ -57,119 +57,6 @@
 | 团队协作 | **Kimi Code Allegretto** | ¥199/月 | 支持多模态，送专属龙虾，代码能力强 |
 | 代码优先 | **GLM Coding Plan Pro** | ¥149/月 | 国内代码能力最强 |
 | 多模型需求 | **阿里云百炼 Pro** | ¥200/月 | 支持模型最多，生态完善 |
-
----
-
-## 国外御三家
-
-### 1. Anthropic (Claude)
-
-#### 官方信息
-- **官网**: https://claude.ai/upgrade
-- **模型**: claude-sonnet-4.6, claude-opus-4.7, claude-haiku-4.5
-
-#### 套餐详情
-
-| 套餐 | 价格 | 模型 |
-|------|------|------|
-| Pro | $20/月 | claude-sonnet-4.6 |
-| Max | $100/月 | claude-opus-4.7 |
-
-#### 实测数据（Pro, claude-sonnet-4.6）
-
-| 指标 | 数值 |
-|------|------|
-| 5h 请求数 | 298 |
-| 5h Tokens | 529万 |
-| 月 Tokens | 1.92亿 |
-| 额度倍率 | 7.38 |
-
-#### 模型特点
-
-| 模型 | 特点 | 适用场景 |
-|------|------|----------|
-| **claude-opus-4.7** | 最强推理能力，5T参数，1M上下文 | 复杂推理、研究任务 |
-| **claude-sonnet-4.6** | 性价比平衡，1T参数，1M上下文 | 日常开发、代码生成 |
-| **claude-haiku-4.5** | 快速响应，成本低 | 简单任务、快速迭代 |
-
-#### 优缺点
-- ✅ 模型能力强，推理能力顶级
-- ✅ 1M 超长上下文
-- ✅ 原生支持 Anthropic API 格式
-- ❌ 中文 Tokenizer 压缩率低（152.86%-203.96%），中文成本高
-- ❌ 价格较高
-- ❌ 国内访问需要网络环境
-
----
-
-### 2. OpenAI (ChatGPT/GPT)
-
-#### 官方信息
-- **官网**: https://chatgpt.com/pricing
-- **模型**: gpt-5.4, gpt-5.5
-
-#### 套餐详情
-
-| 套餐 | 价格 | Codex 额度 |
-|------|------|------------|
-| Plus | $20/月 | 45-225 Local Messages/5h |
-| Pro | $200/月 | 双倍 Codex 配额（至2026/5/31） |
-
-#### 实测数据（Plus, gpt-5.4）
-
-| 指标 | 数值 |
-|------|------|
-| 5h 请求数 | 490 |
-| 5h Tokens | 2000万 |
-| 月 Tokens | 4.8亿 |
-| 额度倍率 | 14.8 |
-
-#### 模型特点
-
-| 模型 | 特点 | 适用场景 |
-|------|------|----------|
-| **gpt-5.5** | 最新旗舰，1.05M上下文 | 复杂任务、多模态 |
-| **gpt-5.4** | 稳定版本，1.05M上下文 | 日常开发、代码生成 |
-
-#### 优缺点
-- ✅ 生态最完善，工具链成熟
-- ✅ 多模态支持（图像输入）
-- ✅ Codex 编程助手集成
-- ✅ 中文 Tokenizer 压缩率适中（100%基准）
-- ❌ 价格较高
-- ❌ 国内访问需要网络环境
-- ❌ 数据隐私问题（默认用于训练）
-
----
-
-### 3. Google (Gemini)
-
-#### 官方信息
-- **官网**: https://ai.google.dev/pricing
-- **模型**: gemini-3.1-pro, gemini-3.1-flash
-
-#### 套餐详情
-
-| 套餐 | 价格 | 说明 |
-|------|------|------|
-| Free | $0 | 1500 RPD, 15 RPM |
-| Pro | $19.99/月 | 200 AI credits/mo |
-| Ultra | $249.99/月 | 25,000 AI credits/mo |
-
-#### 模型特点
-
-| 模型 | 特点 | 适用场景 |
-|------|------|----------|
-| **gemini-3.1-pro** | ~3T参数，1M上下文，多模态 | 复杂任务、长文本 |
-| **gemini-3.1-flash** | 快速响应，成本低 | 简单任务、实时交互 |
-
-#### 优缺点
-- ✅ 1M 超长上下文
-- ✅ 多模态支持
-- ✅ 中文 Tokenizer 压缩率较好（92.73%）
-- ✅ Google 生态集成
-- ❌ 国内访问不稳定
-- ❌ API 稳定性一般
 
 ---
 
@@ -301,12 +188,21 @@
 - **官网**: https://www.aliyun.com/benefit/scene/codingplan
 - **文档**: https://help.aliyun.com/zh/model-studio/coding-plan
 
-#### 套餐详情
+#### Coding Plan 套餐详情
 
 | 套餐 | 价格 | 额度说明 |
 |------|------|----------|
 | Lite (已下线) | ¥40/月 | 1200次/5h, 9000次/周, 18000次/月 |
 | **Pro** | **¥200/月** | **6000次/5h, 45000次/周, 90000次/月** |
+
+#### Token Plan 套餐详情
+
+阿里云百炼还提供 Token Plan，按 Token 消耗量计费：
+
+| 套餐 | 价格 | Tokens | 说明 |
+|------|------|--------|------|
+| 基础版 | 按量计费 | - | 按实际消耗计费 |
+| 资源包 | 预付费 | 多种规格 | 预付费更优惠 |
 
 #### 支持模型
 
@@ -341,6 +237,7 @@
 - ✅ Pro 套餐额度充足
 - ✅ 支持多模态模型
 - ✅ 阿里云生态集成
+- ✅ 提供 Coding Plan 和 Token Plan 两种模式
 - ❌ Lite 套餐已下线
 - ❌ 需要每日 09:30 抢购
 - ❌ 数据用于训练（需注意隐私）
@@ -383,42 +280,255 @@
 
 ---
 
-### 6. 小米 MiMo
+### 6. 腾讯云 (混元)
 
 #### 官方信息
-- **官网**: https://platform.xiaomimimo.com/#/token-plan
-- **模型**: mimo-v2.5, mimo-v2.5-pro
+- **官网**: https://cloud.tencent.com/product/hunyuan
+- **模型**: hy3-preview, Tencent HY 2.0 Think, Tencent HY 2.0 Instruct
 
-#### 套餐详情
+#### 套餐详情（按量计费）
 
-| 套餐 | 价格 | Credits | TPS |
-|------|------|---------|-----|
-| Standard | - | - | - |
-| Pro | ¥329/月 | 7亿 Credits | 46.7 |
-| Max | - | - | - |
+| 模型 | 输入价格 | 输出价格 | 上下文 |
+|------|----------|----------|--------|
+| **hy3-preview** | - | - | 256K |
+| Tencent HY 2.0 Think | ¥3.975/百万 | ¥15.9/百万 | 128K |
+| Tencent HY 2.0 Instruct | ¥3.18/百万 | ¥7.95/百万 | 128K |
+| Hunyuan-T1 | ¥1/百万 | ¥4/百万 | - |
+| Hunyuan-TurboS | ¥0.8/百万 | ¥2/百万 | - |
 
-#### 特殊活动
-- **100T 创造者激励计划**: 申请通过可免费领取一个月 Standard/Pro/Max Token Plan
-- **官网**: https://100t.xiaomimimo.com/
+#### 预付费资源包
+
+| 规格 | 价格 |
+|------|------|
+| 1万点 | ¥100 |
+| 10万点 | ¥950 |
+| 100万点 | ¥9,000 |
+| 1000万点 | ¥85,000 |
+| 1亿点 | ¥800,000 |
+
+#### 免费额度
+- 新用户：100万 Tokens 免费额度（有效期1年）
+- Hunyuan-lite：免费使用
 
 #### 模型特点
 
 | 模型 | 参数量 | 上下文 | 特点 |
 |------|--------|--------|------|
-| **mimo-v2.5-pro** | 1T A42B | 1M | 旗舰模型，多模态支持 |
-| **mimo-v2.5** | 310B A15B | 1M | 标准版本，多模态支持 |
+| **hy3-preview** | 295B A21B | 256K | 代码生成、Agent 能力强 |
+| Tencent HY 2.0 Think | - | 128K | 擅长超长文及复杂任务 |
+| Tencent HY 2.0 Instruct | - | 128K | 快速响应，文创写作强 |
+
+#### 优缺点
+- ✅ **hy3-preview 代码能力强**
+- ✅ 新用户 100万 Tokens 免费
+- ✅ 腾讯生态集成（微信、QQ、腾讯会议等）
+- ✅ 中文 Tokenizer 压缩率好（92.22%）
+- ✅ 支持多模态（图像、视频、3D）
+- ❌ 无 Coding Plan 套餐，仅按量计费
+- ❌ 需要企业/个人实名认证
+
+---
+
+### 7. 讯飞星辰 (星火)
+
+#### 官方信息
+- **官网**: https://xinghuo.xfyun.cn
+- **模型**: Spark 4.0 Ultra, Spark 3.5, Spark Lite
+
+#### 套餐详情
+
+讯飞星火主要提供按量计费模式，无 Coding Plan 套餐。
+
+| 模型 | 特点 | 适用场景 |
+|------|------|----------|
+| **Spark 4.0 Ultra** | 旗舰模型，最强能力 | 复杂任务 |
+| Spark 3.5 | 平衡版本 | 日常使用 |
+| Spark Lite | 轻量版本 | 简单任务 |
+
+#### 优缺点
+- ✅ 讯飞语音生态集成
+- ✅ 中文理解能力强
+- ✅ 教育领域应用广泛
+- ❌ 无 Coding Plan 套餐
+- ❌ 代码能力相对较弱
+- ❌ 文档不够完善
+
+---
+
+### 8. 无问芯穹 (Infini-AI)
+
+#### 官方信息
+- **官网**: https://infini-ai.com
+- **平台**: https://cloud.infini-ai.com
+
+#### 特点
+- 多模型聚合平台
+- 支持多种开源模型部署
+- 提供模型微调服务
+
+#### 优缺点
+- ✅ 多模型聚合
+- ✅ 支持模型微调
+- ✅ 企业级服务
+- ❌ 无 Coding Plan 套餐
+- ❌ 文档信息较少
+
+---
+
+### 9. 小米 MiMo
+
+#### 官方信息
+- **官网**: https://platform.xiaomimimo.com/#/token-plan
+- **激励计划**: https://100t.xiaomimimo.com/
+- **模型**: mimo-v2.5, mimo-v2.5-pro
+
+#### Token Plan 套餐详情
+
+| 套餐 | 价格 | Credits | TPS |
+|------|------|---------|-----|
+| Standard | - | - | - |
+| **Pro** | **¥329/月** | **7亿 Credits** | 46.7 |
+| Max | - | - | - |
+
+#### 特殊活动
+- **100T 创造者激励计划**: 申请通过可**免费领取一个月** Standard/Pro/Max Token Plan
+- **申请地址**: https://100t.xiaomimimo.com/
+- **活动说明**: 面向开发者的激励计划，通过审核即可获得免费额度
+
+#### 模型特点
+
+| 模型 | 参数量 | 上下文 | 特点 |
+|------|--------|--------|------|
+| **mimo-v2.5-pro** | 1T A42B | 1M | 旗舰模型，多模态支持，最强推理能力 |
+| **mimo-v2.5** | 310B A15B | 1M | 标准版本，多模态支持，性价比平衡 |
 
 #### 计费规则
 - MiMo-V2.5-Pro 256k 上下文：消耗 1 Token = 2 Credits
-- 实测月额度价值约 ¥596
+- MiMo-V2.5 1M 上下文：消耗 1 Token = 1 Credit
+- 实测月额度价值约 ¥596（Pro 套餐）
 
 #### 优缺点
-- ✅ 1M 超长上下文
-- ✅ 支持多模态
-- ✅ 100T 创造者激励计划可免费领取
+- ✅ **1M 超长上下文**
+- ✅ **支持多模态**（图像输入）
+- ✅ **100T 创造者激励计划可免费领取**
+- ✅ 小米生态集成潜力
 - ❌ 价格较高（¥329/月）
 - ❌ 生态工具较少
 - ❌ 文档不够完善
+- ❌ 社区活跃度较低
+
+---
+
+## 国外御三家
+
+### 1. Anthropic (Claude)
+
+#### 官方信息
+- **官网**: https://claude.ai/upgrade
+- **模型**: claude-sonnet-4.6, claude-opus-4.7, claude-haiku-4.5
+
+#### 套餐详情
+
+| 套餐 | 价格 | 模型 |
+|------|------|------|
+| Pro | $20/月 | claude-sonnet-4.6 |
+| Max | $100/月 | claude-opus-4.7 |
+
+#### 实测数据（Pro, claude-sonnet-4.6）
+
+| 指标 | 数值 |
+|------|------|
+| 5h 请求数 | 298 |
+| 5h Tokens | 529万 |
+| 月 Tokens | 1.92亿 |
+| 额度倍率 | 7.38 |
+
+#### 模型特点
+
+| 模型 | 特点 | 适用场景 |
+|------|------|----------|
+| **claude-opus-4.7** | 最强推理能力，5T参数，1M上下文 | 复杂推理、研究任务 |
+| **claude-sonnet-4.6** | 性价比平衡，1T参数，1M上下文 | 日常开发、代码生成 |
+| **claude-haiku-4.5** | 快速响应，成本低 | 简单任务、快速迭代 |
+
+#### 优缺点
+- ✅ 模型能力强，推理能力顶级
+- ✅ 1M 超长上下文
+- ✅ 原生支持 Anthropic API 格式
+- ❌ 中文 Tokenizer 压缩率低（152.86%-203.96%），中文成本高
+- ❌ 价格较高
+- ❌ 国内访问需要网络环境
+
+---
+
+### 2. OpenAI (ChatGPT/GPT)
+
+#### 官方信息
+- **官网**: https://chatgpt.com/pricing
+- **模型**: gpt-5.4, gpt-5.5
+
+#### 套餐详情
+
+| 套餐 | 价格 | Codex 额度 |
+|------|------|------------|
+| Plus | $20/月 | 45-225 Local Messages/5h |
+| Pro | $200/月 | 双倍 Codex 配额（至2026/5/31） |
+
+#### 实测数据（Plus, gpt-5.4）
+
+| 指标 | 数值 |
+|------|------|
+| 5h 请求数 | 490 |
+| 5h Tokens | 2000万 |
+| 月 Tokens | 4.8亿 |
+| 额度倍率 | 14.8 |
+
+#### 模型特点
+
+| 模型 | 特点 | 适用场景 |
+|------|------|----------|
+| **gpt-5.5** | 最新旗舰，1.05M上下文 | 复杂任务、多模态 |
+| **gpt-5.4** | 稳定版本，1.05M上下文 | 日常开发、代码生成 |
+
+#### 优缺点
+- ✅ 生态最完善，工具链成熟
+- ✅ 多模态支持（图像输入）
+- ✅ Codex 编程助手集成
+- ✅ 中文 Tokenizer 压缩率适中（100%基准）
+- ❌ 价格较高
+- ❌ 国内访问需要网络环境
+- ❌ 数据隐私问题（默认用于训练）
+
+---
+
+### 3. Google (Gemini)
+
+#### 官方信息
+- **官网**: https://ai.google.dev/pricing
+- **模型**: gemini-3.1-pro, gemini-3.1-flash
+
+#### 套餐详情
+
+| 套餐 | 价格 | 说明 |
+|------|------|------|
+| Free | $0 | 1500 RPD, 15 RPM |
+| Pro | $19.99/月 | 200 AI credits/mo |
+| Ultra | $249.99/月 | 25,000 AI credits/mo |
+
+#### 模型特点
+
+| 模型 | 特点 | 适用场景 |
+|------|------|----------|
+| **gemini-3.1-pro** | ~3T参数，1M上下文，多模态 | 复杂任务、长文本 |
+| **gemini-3.1-flash** | 快速响应，成本低 | 简单任务、实时交互 |
+
+#### 优缺点
+- ✅ 1M 超长上下文
+- ✅ 多模态支持
+- ✅ 中文 Tokenizer 压缩率较好（92.73%）
+- ✅ Google 生态集成
+- ❌ 国内访问不稳定
+- ❌ API 稳定性一般
 
 ---
 
@@ -470,7 +580,7 @@
 
 | 模型 | 限制 | 说明 |
 |------|------|------|
-| hy3-preview | 50 reqs/day | Hugging Face 模型 |
+| hy3-preview | 50 reqs/day | 腾讯混元模型 |
 | minimax-m2.5 | 50 reqs/day | MiniMax 模型 |
 | qwen3-coder | 50 reqs/day | 千问代码模型 |
 
@@ -478,11 +588,18 @@
 - 按用量计费，支持数百种模型
 - 充值后按实际 Token 消耗扣费
 - 不同模型价格不同
+- 支持预付费余额
+
+#### 套餐特点
+- 无月费订阅套餐
+- 完全按使用量计费
+- 支持多种支付方式
 
 #### 优缺点
 - ✅ **多模型聚合平台**（数百种模型）
 - ✅ 部分模型限免
 - ✅ 灵活的按量计费
+- ✅ 无月费，用多少付多少
 - ❌ 免费额度有限（50 reqs/day）
 - ❌ 需要国际支付方式
 
@@ -688,10 +805,16 @@
 3. [DeepSeek API 定价](https://api-docs.deepseek.com/zh-cn/quick_start/pricing)
 4. [阿里云百炼 Coding Plan](https://www.aliyun.com/benefit/scene/codingplan)
 5. [阿里云百炼 Coding Plan 文档](https://help.aliyun.com/zh/model-studio/coding-plan)
-6. [Ollama 定价](https://ollama.com/pricing)
-7. [NVIDIA NIM](https://build.nvidia.com)
-8. [OpenCode Go](https://opencode.ai/go)
-9. [OpenRouter](https://openrouter.ai)
+6. [腾讯混元大模型](https://cloud.tencent.com/product/hunyuan)
+7. [腾讯混元计费文档](https://cloud.tencent.com/document/product/1729/97731)
+8. [讯飞星火](https://xinghuo.xfyun.cn)
+9. [无问芯穹](https://infini-ai.com)
+10. [小米 MiMo](https://platform.xiaomimimo.com)
+11. [小米 MiMo 100T 激励计划](https://100t.xiaomimimo.com/)
+12. [Ollama 定价](https://ollama.com/pricing)
+13. [NVIDIA NIM](https://build.nvidia.com)
+14. [OpenCode Go](https://opencode.ai/go)
+15. [OpenRouter](https://openrouter.ai)
 
 ---
 
