@@ -168,3 +168,96 @@ class TestPlatformSelectors:
         from src.data_crawl.selectors import is_article_page
         assert is_article_page("https://mp.weixin.qq.com/s/abc", Platform.WECHAT) == True
         assert is_article_page("https://mp.weixin.qq.com/mp/profile_ext", Platform.WECHAT) == False
+
+
+from src.data_crawl.extractor import (
+    extract_article,
+    extract_list_links,
+    convert_to_markdown,
+    ArticleData,
+)
+
+
+class TestExtractArticle:
+    @pytest.mark.asyncio
+    async def test_extract_article_from_wechat(self):
+        mock_page = AsyncMock()
+        mock_page.title = AsyncMock(return_value="测试文章标题")
+        mock_page.url = "https://mp.weixin.qq.com/s/abc123"
+        
+        async def mock_query_selector(selector):
+            mock_elem = AsyncMock()
+            if selector == "#activity-name":
+                mock_elem.inner_text = AsyncMock(return_value="测试文章标题")
+            elif selector == "#js_name":
+                mock_elem.inner_text = AsyncMock(return_value="测试作者")
+            elif selector == "#publish_time":
+                mock_elem.inner_text = AsyncMock(return_value="2024-01-01")
+            elif selector == "#js_content":
+                mock_elem.inner_html = AsyncMock(return_value="<p>测试内容</p>")
+            else:
+                return None
+            return mock_elem
+        
+        mock_page.query_selector = AsyncMock(side_effect=mock_query_selector)
+        mock_page.query_selector_all = AsyncMock(return_value=[])
+        
+        result = await extract_article(mock_page, Platform.WECHAT)
+        
+        assert result is not None
+        assert result.title == "测试文章标题"
+
+    @pytest.mark.asyncio
+    async def test_extract_article_returns_none_on_error(self):
+        mock_page = AsyncMock()
+        mock_page.query_selector = AsyncMock(side_effect=Exception("Page error"))
+        
+        result = await extract_article(mock_page, Platform.WECHAT)
+        
+        assert result is None
+
+
+class TestConvertToMarkdown:
+    def test_convert_basic_article(self):
+        article = ArticleData(
+            title="测试标题",
+            author="测试作者",
+            date="2024-01-01",
+            url="https://example.com/article",
+            content="<p>这是正文内容</p>",
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "# 测试标题" in markdown
+        assert "**作者：** 测试作者" in markdown
+        assert "**发布时间：** 2024-01-01" in markdown
+        assert "这是正文内容" in markdown
+
+    def test_convert_article_with_images(self):
+        article = ArticleData(
+            title="测试标题",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content='<p>内容</p><img src="https://example.com/img.jpg" alt="图片">',
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "![图片](https://example.com/img.jpg)" in markdown
+
+
+class TestArticleData:
+    def test_article_data_creation(self):
+        article = ArticleData(
+            title="标题",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content="内容",
+        )
+        
+        assert article.title == "标题"
+        assert article.author == "作者"
+        assert article.date == "2024-01-01"

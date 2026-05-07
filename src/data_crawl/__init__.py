@@ -12,6 +12,9 @@ from .utils import (
 # Task 3: 导出平台选择器
 from .selectors import get_platform_config, detect_platform, Platform, is_article_page, is_list_page
 
+# Task 4: 导出内容提取器
+from .extractor import extract_article, extract_list_links, convert_to_markdown, ArticleData
+
 __all__ = [
     "random_delay",
     "sanitize_filename",
@@ -20,4 +23,5 @@ __all__ = [
     "Platform",
     "is_article_page",
     "is_list_page",
+    "ArticleData",
 ]
