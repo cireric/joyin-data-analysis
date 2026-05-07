@@ -9,6 +9,9 @@ from .utils import (
     save_state,
 )
 
+# Task 2: 导出浏览器管理器
+from .browser import BrowserManager
+
 # Task 3: 导出平台选择器
 from .selectors import get_platform_config, detect_platform, Platform, is_article_page, is_list_page
 
@@ -23,10 +26,15 @@ __all__ = [
     "sanitize_filename",
     "load_state",
     "save_state",
+    "BrowserManager",
     "Platform",
+    "detect_platform",
     "is_article_page",
     "is_list_page",
     "ArticleData",
+    "extract_article",
+    "extract_list_links",
+    "convert_to_markdown",
     "download_images",
     "download_single_image",
 ]

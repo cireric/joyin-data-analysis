@@ -60,6 +60,7 @@ class BrowserManager:
         if self._browser is None:
             self._browser = await self._playwright.chromium.launch(
                 headless=self.headless,
+                channel='chrome',
                 args=[
                     '--disable-blink-features=AutomationControlled',
                     '--disable-dev-shm-usage',
