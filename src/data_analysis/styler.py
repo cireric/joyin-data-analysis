@@ -20,6 +20,8 @@ THIN_BORDER = Border(
     bottom=Side(style='thin')
 )
 
+INTEGER_COLUMN_KEYWORDS = ['杯', '次数', '数量', '台数']
+
 
 def sanitize_filename(name: str) -> str:
     """
@@ -105,7 +107,7 @@ def style_workbook(ws, value_columns: list, analysis_types: list):
     col_idx = 2
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
-        is_int = '杯' in col_name
+        is_int = any(kw in col_name for kw in INTEGER_COLUMN_KEYWORDS)
         if is_int:
             int_cols.add(col_idx)
         col_idx += 1
@@ -135,7 +137,7 @@ def style_group_sheet(ws, metrics: list):
     int_cols = set()
     col_idx = 2
     for m in metrics:
-        is_int = '杯' in m
+        is_int = any(kw in m for kw in INTEGER_COLUMN_KEYWORDS)
         if is_int:
             int_cols.add(col_idx)
         col_idx += 1

@@ -50,15 +50,13 @@ def count_maintenance_by_point(
         Dict mapping point name to maintenance count: {'江门戴爱莲': 2}
     """
     sales_code_to_name = {}
-    for _, row in sales_df.iterrows():
-        code = row.get(code_col)
-        name = row.get(name_col)
-        if pd.notna(code) and pd.notna(name):
-            sales_code_to_name[str(int(code))] = name
+    valid_mask = sales_df[code_col].notna() & sales_df[name_col].notna()
+    for _, row in sales_df[valid_mask].iterrows():
+        sales_code_to_name[str(int(row[code_col]))] = row[name_col]
 
     counts: Dict[str, int] = {}
-    for _, row in maintenance_df.iterrows():
-        site_name = row.get(site_col)
+    site_names = maintenance_df[site_col].dropna()
+    for site_name in site_names:
         code = extract_machine_code(site_name)
         if code and code in sales_code_to_name:
             point_name = sales_code_to_name[code]
@@ -91,10 +89,7 @@ def generate_unmatched_sheet(
     if unmatched.empty:
         return None
 
-    result = unmatched.copy()
-    result['提取机器码'] = result[site_col].apply(extract_machine_code)
-
-    return result
+    return unmatched
 
 
 def process_maintenance_data(

@@ -11,7 +11,9 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from typing import List
 
-from .analyzer import calc_comparison
+from .loader import load_data, validate_data
+from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals, merge_maintenance_counts, calc_comparison
+from .maintenance import process_maintenance_data
 from .styler import style_workbook, style_group_sheet, sanitize_filename
 
 
@@ -219,10 +221,6 @@ def generate_report(config: dict, data: dict = None, maintenance_file: str = Non
     Returns:
         Tuple of (output_file_path, point_count, group_count, supervisor_count, unmatched_count)
     """
-    from .loader import load_data, validate_data
-    from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals, merge_maintenance_counts
-    from .maintenance import process_maintenance_data
-    
     if data is None:
         data = load_data(config)
     
@@ -237,12 +235,13 @@ def generate_report(config: dict, data: dict = None, maintenance_file: str = Non
     
     if maintenance_file:
         current_df = data[config['periods']['current']]
-        code_col = '机器编号'
+        maintenance_config = config.get('maintenance', {})
+        code_col = maintenance_config.get('code_column', '机器编号')
         if code_col in current_df.columns:
             maintenance_counts, unmatched_df = process_maintenance_data(
                 maintenance_file,
                 current_df,
-                site_col=config.get('maintenance', {}).get('site_column', '站点名称'),
+                site_col=maintenance_config.get('site_column', '站点名称'),
                 code_col=code_col,
                 name_col=config['key_column']
             )

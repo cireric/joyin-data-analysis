@@ -6,7 +6,7 @@ Handles data analysis: merging, filling, calculating comparisons.
 
 import pandas as pd
 import numpy as np
-from typing import List, Union
+from typing import List, Union, Optional
 
 
 def standardize_columns(df: pd.DataFrame, period: str, 
@@ -18,6 +18,20 @@ def standardize_columns(df: pd.DataFrame, period: str,
         if col_name in df.columns:
             new_cols[col_name] = f"{col_name}_{period}"
     return df.rename(columns=new_cols)
+
+
+def calc_comparison_vectorized(current: pd.Series, previous: pd.Series) -> pd.Series:
+    """
+    Calculate comparison percentage using vectorized operations.
+
+    Returns NaN if current or previous is NaN, or if previous is 0.
+    """
+    result = np.where(
+        (previous == 0) | previous.isna() | current.isna(),
+        np.nan,
+        (current - previous) / previous
+    )
+    return pd.Series(result, index=current.index)
 
 
 def merge_periods(data: dict, periods: dict, 
@@ -67,21 +81,21 @@ def fill_missing_values(df: pd.DataFrame, key_column: str, value_columns: list) 
     return df
 
 
-def calc_comparison(current, previous):
+def calc_comparison(current, previous) -> Optional[float]:
     """
-    Calculate comparison percentage.
+    Calculate comparison percentage (scalar version for totals).
 
-    Returns 'N/A' if current or previous is NaN, or if previous is 0.
+    Returns None if current or previous is NaN, or if previous is 0.
     """
     if pd.isna(current) or pd.isna(previous) or previous == 0:
-        return 'N/A'
+        return None
     return (current - previous) / previous
 
 
 def calculate_analysis(df: pd.DataFrame, value_columns: list, 
                        analysis_types: list) -> pd.DataFrame:
     """
-    Calculate YoY/MoM comparisons for each value column.
+    Calculate YoY/MoM comparisons for each value column using vectorized operations.
     
     Args:
         df: DataFrame with _current and _previous columns
@@ -91,15 +105,17 @@ def calculate_analysis(df: pd.DataFrame, value_columns: list,
     Returns:
         DataFrame with added _yoy columns
     """
+    if 'yoy' not in analysis_types:
+        return df
+    
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
         current_col = f"{col_name}_current"
         previous_col = f"{col_name}_previous"
 
-        if 'yoy' in analysis_types:
-            df[f"{col_name}_yoy"] = df.apply(
-                lambda row: calc_comparison(row[current_col], row[previous_col]), axis=1
-            )
+        df[f"{col_name}_yoy"] = calc_comparison_vectorized(
+            df[current_col], df[previous_col]
+        )
 
     return df
 
