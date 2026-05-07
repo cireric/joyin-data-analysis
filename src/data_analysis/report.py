@@ -12,7 +12,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from typing import List
 
 from .loader import load_data, validate_data
-from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals, merge_maintenance_counts, calc_comparison
+from .analyzer import merge_periods, fill_missing_values, calculate_analysis, add_totals, merge_maintenance_counts, calc_comparison, calc_comparison_vectorized
 from .maintenance import process_maintenance_data
 from .styler import style_workbook, style_group_sheet, sanitize_filename
 
@@ -107,8 +107,8 @@ def generate_group_summary(data: dict, periods: dict, group_config: dict,
     merged = group_current.merge(group_previous, on=group_col, how='outer')
 
     for m in metrics:
-        merged[f"{m}_yoy"] = merged.apply(
-            lambda row: calc_comparison(row[f"{m}_current"], row[f"{m}_previous"]), axis=1
+        merged[f"{m}_yoy"] = calc_comparison_vectorized(
+            merged[f"{m}_current"], merged[f"{m}_previous"]
         )
 
     output_cols = [group_col]

@@ -49,10 +49,12 @@ def count_maintenance_by_point(
     Returns:
         Dict mapping point name to maintenance count: {'江门戴爱莲': 2}
     """
-    sales_code_to_name = {}
     valid_mask = sales_df[code_col].notna() & sales_df[name_col].notna()
-    for _, row in sales_df[valid_mask].iterrows():
-        sales_code_to_name[str(int(row[code_col]))] = row[name_col]
+    valid_df = sales_df[valid_mask]
+    sales_code_to_name = dict(zip(
+        valid_df[code_col].astype(int).astype(str),
+        valid_df[name_col]
+    ))
 
     counts: Dict[str, int] = {}
     site_names = maintenance_df[site_col].dropna()

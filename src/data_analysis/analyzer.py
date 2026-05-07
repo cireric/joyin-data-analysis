@@ -112,6 +112,9 @@ def calculate_analysis(df: pd.DataFrame, value_columns: list,
         col_name = vc['name'] if isinstance(vc, dict) else vc
         current_col = f"{col_name}_current"
         previous_col = f"{col_name}_previous"
+        
+        if current_col not in df.columns or previous_col not in df.columns:
+            continue
 
         df[f"{col_name}_yoy"] = calc_comparison_vectorized(
             df[current_col], df[previous_col]

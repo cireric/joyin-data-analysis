@@ -61,10 +61,12 @@ def match_by_machine_code(
     Returns:
         Dict mapping machine code to point name: {'23398': '小榄服务区服务楼'}
     """
-    sales_code_to_name = {}
-    valid_codes = sales_df[code_col].notna() & sales_df[name_col].notna()
-    for _, row in sales_df[valid_codes].iterrows():
-        sales_code_to_name[str(int(row[code_col]))] = row[name_col]
+    valid_mask = sales_df[code_col].notna() & sales_df[name_col].notna()
+    valid_df = sales_df[valid_mask]
+    sales_code_to_name = dict(zip(
+        valid_df[code_col].astype(int).astype(str),
+        valid_df[name_col]
+    ))
 
     matched = {}
     site_names = maintenance_df[site_col].dropna()
