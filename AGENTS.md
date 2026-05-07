@@ -8,6 +8,7 @@
   - Custom: `make analyze c=2026.04.13~2026.04.19 p=2026.04.06~2026.04.12`
 - PDF to Word: `python scripts/pdf2word.py input.pdf [-o output.docx] [--pages 1-5] [--preset contract] [--force] [--debug]`
 - Markdown to Word: `python scripts/md2word.py input.md [-o output.docx] [--reference-docx template.docx] [--toc] [--force]`
+- URL to Markdown: `python scripts/url2md.py <url> [--output dir/] [--download-images] [--limit N] [--delay N] [--resume]`
 - Install deps: `.venv\Scripts\pip install -r requirements.txt`
 - Activate venv: `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Unix)
 - Clean up: `make clean` or `.venv\Scripts\python.exe scripts\cleanup.py`
