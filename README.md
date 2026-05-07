@@ -10,6 +10,7 @@
 - 分组汇总（如督导人员汇总）
 - 样式化Excel输出（蓝色表头、橙色总计、百分比格式）
 - PDF转Word：支持多种预设模式优化格式还原
+- URL转Markdown：抓取网页内容并转换为Markdown格式
 
 ## 快速开始
 
@@ -96,6 +97,54 @@ python scripts/pdf2word.py input.pdf --debug
 | `table` | 表格为主 | 增强表格解析、忽略浮动图片 |
 | `text` | 纯文本文档 | 增强段落解析、忽略表格 |
 
+### URL转Markdown
+
+抓取网页内容并转换为Markdown格式，支持单篇文章和列表页批量抓取：
+
+```bash
+# 单篇文章
+python scripts/url2md.py "https://mp.weixin.qq.com/s/xxx"
+
+# 列表页（批量抓取）
+python scripts/url2md.py "https://mp.weixin.qq.com/mp/profile_ext?action=home&..."
+
+# 指定输出目录
+python scripts/url2md.py <url> --output misc/articles/
+
+# 下载图片到本地
+python scripts/url2md.py <url> --download-images
+
+# 限制抓取数量
+python scripts/url2md.py <url> --limit 10
+
+# 断点续传
+python scripts/url2md.py <url> --resume --state state.json
+
+# 自定义延迟
+python scripts/url2md.py <url> --delay 3 --max-delay 8
+```
+
+**参数说明：**
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `url` | 文章或列表页URL | 必填 |
+| `--output` | 输出目录 | `misc/` |
+| `--filename` | 文件名（仅单篇有效） | 自动生成 |
+| `--download-images` | 下载图片到本地 | 否 |
+| `--images-dir` | 图片保存目录 | `output/images/` |
+| `--limit` | 列表页最大抓取数 | 无限制 |
+| `--delay` | 基础延迟（秒） | 2 |
+| `--max-delay` | 最大延迟（秒） | 5 |
+| `--resume` | 断点续传 | 否 |
+| `--state` | 状态文件路径 | `url2md-state.json` |
+
+**支持平台：**
+- 微信公众号
+- 知乎专栏
+- 简书
+- 通用网页（自动识别）
+
 ## 目录结构
 
 ```
@@ -111,6 +160,8 @@ data_analysis/
 ├── scripts/            # CLI入口脚本
 │   ├── run_analysis.py # 主分析脚本
 │   ├── pdf2word.py     # PDF转Word
+│   ├── md2word.py      # Markdown转Word
+│   ├── url2md.py       # URL转Markdown
 │   └── cleanup.py      # 清理脚本
 ├── tests/              # 单元测试
 ├── docs/               # 文档
@@ -121,11 +172,17 @@ data_analysis/
 
 ## 依赖
 
-- pandas
-- numpy
-- openpyxl
-- pyyaml
-- pdf2docx
+- pandas - 数据处理
+- numpy - 数值计算
+- openpyxl - Excel读写
+- pyyaml - YAML配置
+- pdf2docx - PDF转Word
+- pypandoc - Markdown转Word
+- playwright - 网页抓取
+- aiohttp - 异步HTTP请求
+- aiofiles - 异步文件操作
+- pytest - 测试框架
+- pytest-asyncio - 异步测试支持
 
 ## 许可
 
