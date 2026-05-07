@@ -9,9 +9,15 @@ from .utils import (
     save_state,
 )
 
+# Task 3: 导出平台选择器
+from .selectors import get_platform_config, detect_platform, Platform, is_article_page, is_list_page
+
 __all__ = [
     "random_delay",
     "sanitize_filename",
     "load_state",
     "save_state",
+    "Platform",
+    "is_article_page",
+    "is_list_page",
 ]

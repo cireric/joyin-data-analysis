@@ -123,3 +123,48 @@ class TestBrowserManager:
             call_kwargs = mock_browser.new_context.call_args[1]
             assert 'user_agent' in call_kwargs
             assert 'Mozilla' in call_kwargs['user_agent']
+
+
+from src.data_crawl.selectors import get_platform_config, detect_platform, Platform
+
+
+class TestPlatformSelectors:
+    def test_detect_wechat_article(self):
+        url = "https://mp.weixin.qq.com/s/abc123"
+        platform = detect_platform(url)
+        assert platform == Platform.WECHAT
+
+    def test_detect_wechat_list(self):
+        url = "https://mp.weixin.qq.com/mp/profile_ext?action=home"
+        platform = detect_platform(url)
+        assert platform == Platform.WECHAT
+
+    def test_detect_zhihu_article(self):
+        url = "https://zhuanlan.zhihu.com/p/123456"
+        platform = detect_platform(url)
+        assert platform == Platform.ZHIHU
+
+    def test_detect_jianshu_article(self):
+        url = "https://www.jianshu.com/p/abc123"
+        platform = detect_platform(url)
+        assert platform == Platform.JIANSHU
+
+    def test_detect_generic(self):
+        url = "https://example.com/article"
+        platform = detect_platform(url)
+        assert platform == Platform.GENERIC
+
+    def test_get_wechat_config(self):
+        config = get_platform_config(Platform.WECHAT)
+        assert config['article_selector'] == '#js_content'
+        assert config['title_selector'] == '#activity-name'
+
+    def test_get_zhihu_config(self):
+        config = get_platform_config(Platform.ZHIHU)
+        assert 'article_selector' in config
+        assert 'title_selector' in config
+
+    def test_is_article_page_wechat(self):
+        from src.data_crawl.selectors import is_article_page
+        assert is_article_page("https://mp.weixin.qq.com/s/abc", Platform.WECHAT) == True
+        assert is_article_page("https://mp.weixin.qq.com/mp/profile_ext", Platform.WECHAT) == False
