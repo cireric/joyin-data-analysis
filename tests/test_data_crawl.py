@@ -261,3 +261,68 @@ class TestArticleData:
         assert article.title == "标题"
         assert article.author == "作者"
         assert article.date == "2024-01-01"
+
+
+import os
+import tempfile
+import pytest
+from unittest.mock import AsyncMock, patch, MagicMock
+from src.data_crawl.downloader import download_images, download_single_image
+
+
+class TestDownloader:
+    @pytest.mark.asyncio
+    async def test_download_single_image(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 模拟 aiohttp ClientSession
+            from src.data_crawl import downloader
+            
+            # Skip if aiohttp not installed
+            if downloader.aiohttp is None:
+                pytest.skip("aiohttp not installed")
+            
+            with patch('src.data_crawl.downloader.aiohttp.ClientSession') as mock_session_cls:
+                mock_session = AsyncMock()
+                mock_response = AsyncMock()
+                mock_response.status = 200
+                mock_response.read.return_value = b'\x89PNG\r\n\x1a\n'  # PNG header
+                mock_response.__aenter__.return_value = mock_response
+                mock_session.get.return_value = mock_response
+                mock_session.__aenter__.return_value = mock_session
+                mock_session_cls.return_value = mock_session
+                
+                result = await download_single_image(
+                    "https://example.com/image.png",
+                    os.path.join(tmpdir, "image.png")
+                )
+                
+                assert result is True
+                assert os.path.exists(os.path.join(tmpdir, "image.png"))
+
+    @pytest.mark.asyncio
+    async def test_download_images_list(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            images = [
+                "https://example.com/img1.jpg",
+                "https://example.com/img2.png",
+            ]
+            
+            with patch('src.data_crawl.downloader.download_single_image') as mock_download:
+                mock_download.return_value = True
+                
+                results = await download_images(images, tmpdir)
+                
+                assert len(results) == 2
+                assert mock_download.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_download_images_handles_failure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            images = ["https://example.com/bad.jpg"]
+            
+            with patch('src.data_crawl.downloader.download_single_image') as mock_download:
+                mock_download.return_value = False
+                
+                results = await download_images(images, tmpdir)
+                
+                assert results == {}

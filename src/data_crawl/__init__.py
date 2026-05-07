@@ -15,6 +15,9 @@ from .selectors import get_platform_config, detect_platform, Platform, is_articl
 # Task 4: 导出内容提取器
 from .extractor import extract_article, extract_list_links, convert_to_markdown, ArticleData
 
+# Task 5: 导出图片下载器
+from .downloader import download_images, download_single_image
+
 __all__ = [
     "random_delay",
     "sanitize_filename",
@@ -24,4 +27,6 @@ __all__ = [
     "is_article_page",
     "is_list_page",
     "ArticleData",
+    "download_images",
+    "download_single_image",
 ]
