@@ -61,16 +61,16 @@ def match_by_machine_code(
     Returns:
         Dict mapping machine code to point name: {'23398': '小榄服务区服务楼'}
     """
-    sales_code_to_name = {}
-    for _, row in sales_df.iterrows():
-        code = row.get(code_col)
-        name = row.get(name_col)
-        if pd.notna(code) and pd.notna(name):
-            sales_code_to_name[str(int(code))] = name
+    valid_mask = sales_df[code_col].notna() & sales_df[name_col].notna()
+    valid_df = sales_df[valid_mask]
+    sales_code_to_name = dict(zip(
+        valid_df[code_col].astype(int).astype(str),
+        valid_df[name_col]
+    ))
 
     matched = {}
-    for _, row in maintenance_df.iterrows():
-        site_name = row.get(site_col)
+    site_names = maintenance_df[site_col].dropna()
+    for site_name in site_names:
         code = extract_machine_code(site_name)
         if code and code in sales_code_to_name:
             matched[code] = sales_code_to_name[code]
@@ -125,13 +125,11 @@ def get_unmatched_records(
     Returns:
         DataFrame with unmatched records
     """
-    unmatched = []
-    for _, row in maintenance_df.iterrows():
-        site_name = row.get(site_col)
-        code = extract_machine_code(site_name)
-        if code not in matched_codes:
-            unmatched.append(row)
+    site_names = maintenance_df[site_col]
+    codes = site_names.apply(extract_machine_code)
 
-    if unmatched:
-        return pd.DataFrame(unmatched)
-    return pd.DataFrame()
+    unmatched_mask = codes.isna() | ~codes.isin(matched_codes)
+    result = maintenance_df[unmatched_mask].copy()
+    result['提取机器码'] = codes[unmatched_mask]
+
+    return result
