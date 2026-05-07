@@ -26,10 +26,10 @@ INTEGER_COLUMN_KEYWORDS = ['杯', '次数', '数量', '台数']
 def sanitize_filename(name: str) -> str:
     """
     Sanitize filename by removing dangerous characters.
-    
+
     Args:
         name: Original filename
-        
+
     Returns:
         Safe filename string
     """
@@ -43,14 +43,14 @@ def auto_fit_columns(ws):
     for col_idx in range(1, ws.max_column + 1):
         max_length = 0
         col_letter = get_column_letter(col_idx)
-        
+
         for row_idx in range(1, ws.max_row + 1):
             cell = ws.cell(row=row_idx, column=col_idx)
             if cell.value:
                 cell_length = len(str(cell.value))
                 if cell_length > max_length:
                     max_length = cell_length
-        
+
         adjusted_width = max_length + 2
         ws.column_dimensions[col_letter].width = max(adjusted_width, 8)
 
@@ -94,7 +94,7 @@ def apply_total_row_style(ws):
 def style_workbook(ws, value_columns: list, analysis_types: list):
     """
     Apply styling to worksheet: header, borders, number formats, total row.
-    
+
     Args:
         ws: Worksheet to style
         value_columns: List of value column configs
@@ -126,7 +126,7 @@ def style_workbook(ws, value_columns: list, analysis_types: list):
 def style_group_sheet(ws, metrics: list):
     """
     Apply styling to group summary sheet.
-    
+
     Args:
         ws: Worksheet to style
         metrics: List of metric names

@@ -23,18 +23,18 @@ def reorder_value_columns(value_columns: list) -> list:
     """
     priority = []
     others = []
-    
+
     for vc in value_columns:
         col_name = vc['name'] if isinstance(vc, dict) else vc
         if not col_name:
             continue
         is_priority = '总' in col_name
-        
+
         if is_priority:
             priority.append(vc)
         else:
             others.append(vc)
-    
+
     return priority + others
 
 
@@ -62,7 +62,7 @@ def filter_group_metrics(value_columns: list, metrics_config) -> list:
         return [vc['name'] if isinstance(vc, dict) else vc for vc in value_columns]
 
 
-def generate_group_summary(data: dict, periods: dict, group_config: dict, 
+def generate_group_summary(data: dict, periods: dict, group_config: dict,
                            value_columns: list, analysis_types: list) -> pd.DataFrame:
     """
     Generate group-by summary (e.g., supervisor summary).
@@ -137,13 +137,13 @@ def generate_group_summary(data: dict, periods: dict, group_config: dict,
     return result
 
 
-def generate_supervisor_detail(result: pd.DataFrame, group_col: str, 
+def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
                                supervisor: str, key_column: str,
                                value_columns: list, analysis_types: list,
                                periods: dict) -> pd.DataFrame:
     """
     Generate detail sheet for a single supervisor.
-    
+
     Args:
         result: Full analysis result DataFrame
         group_col: Group column name (e.g., 督导人员)
@@ -152,18 +152,18 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
         value_columns: List of value column configs
         analysis_types: List of analysis types
         periods: Period labels
-        
+
     Returns:
         Filtered DataFrame for the supervisor
     """
     if group_col not in result.columns:
         return None
-    
+
     supervisor_data = result[result[group_col] == supervisor].copy()
-    
+
     if supervisor_data.empty:
         return None
-    
+
     reordered_columns = reorder_value_columns(value_columns)
 
     output_cols = [key_column]
@@ -183,16 +183,16 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
         col_name = vc['name'] if isinstance(vc, dict) else vc
         prev_col = f"{col_name}_previous"
         curr_col = f"{col_name}_current"
-        
+
         prev_total = supervisor_data[prev_col].sum()
         curr_total = supervisor_data[curr_col].sum()
-        
+
         totals[prev_col] = prev_total
         totals[curr_col] = curr_total
-        
+
         if 'yoy' in analysis_types:
             totals[f"{col_name}_yoy"] = calc_comparison(curr_total, prev_total)
-    
+
     supervisor_data = pd.concat([supervisor_data, pd.DataFrame([totals])], ignore_index=True)
 
     rename_map = {key_column: key_column}
@@ -212,27 +212,27 @@ def generate_supervisor_detail(result: pd.DataFrame, group_col: str,
 def generate_report(config: dict, data: dict = None, maintenance_file: str = None) -> tuple:
     """
     Generate Excel report from configuration.
-    
+
     Args:
         config: Configuration dictionary
         data: Pre-loaded data (optional, will load if not provided)
         maintenance_file: Path to maintenance Excel file (optional)
-        
+
     Returns:
         Tuple of (output_file_path, point_count, group_count, supervisor_count, unmatched_count)
     """
     if data is None:
         data = load_data(config)
-    
+
     validate_data(data, config['periods'], config['key_column'], config['value_columns'])
-    
+
     merged = merge_periods(data, config['periods'], config['key_column'], config['value_columns'])
     merged = fill_missing_values(merged, config['key_column'], config['value_columns'])
-    
+
     maintenance_counts = {}
     unmatched_df = None
     unmatched_count = 0
-    
+
     if maintenance_file:
         current_df = data[config['periods']['current']]
         maintenance_config = config.get('maintenance', {})
@@ -247,7 +247,7 @@ def generate_report(config: dict, data: dict = None, maintenance_file: str = Non
             )
             if unmatched_df is not None:
                 unmatched_count = len(unmatched_df)
-    
+
     group_col = None
     if 'group_by' in config and config['group_by']:
         group_col = config['group_by']['column']
@@ -259,14 +259,14 @@ def generate_report(config: dict, data: dict = None, maintenance_file: str = Non
                     on=config['key_column'],
                     how='left'
                 )
-    
+
     result = calculate_analysis(merged, config['value_columns'], config['analysis'])
-    
+
     if maintenance_counts:
         result = merge_maintenance_counts(result, maintenance_counts, config['key_column'])
-    
+
     result = add_totals(result, config['key_column'], config['value_columns'], config['analysis'])
-    
+
     reordered_columns = reorder_value_columns(config['value_columns'])
 
     output_cols = [config['key_column']]
@@ -323,16 +323,16 @@ def generate_report(config: dict, data: dict = None, maintenance_file: str = Non
             ws2.append(r)
 
         style_group_sheet(ws2, metrics)
-        
+
         supervisors = group_result[group_col].iloc[:-1].tolist()
         supervisors = [s for s in supervisors if pd.notna(s)]
-        
+
         for supervisor in supervisors:
             supervisor_data = generate_supervisor_detail(
                 merged, group_col, supervisor, config['key_column'],
                 config['value_columns'], config['analysis'], config['periods']
             )
-            
+
             if supervisor_data is not None and not supervisor_data.empty:
                 ws_detail = wb.create_sheet(str(supervisor))
                 for r in dataframe_to_rows(supervisor_data, index=False, header=True):

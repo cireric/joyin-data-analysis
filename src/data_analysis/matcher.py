@@ -127,9 +127,9 @@ def get_unmatched_records(
     """
     site_names = maintenance_df[site_col]
     codes = site_names.apply(extract_machine_code)
-    
+
     unmatched_mask = codes.isna() | ~codes.isin(matched_codes)
     result = maintenance_df[unmatched_mask].copy()
     result['提取机器码'] = codes[unmatched_mask]
-    
+
     return result
