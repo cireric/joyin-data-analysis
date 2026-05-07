@@ -333,25 +333,65 @@
 
 #### 官方信息
 - **官网**: https://xinghuo.xfyun.cn
-- **模型**: Spark 4.0 Ultra, Spark 3.5, Spark Lite
+- **MaaS 平台**: https://maas.xfyun.cn
+- **Coding Plan 文档**: https://www.xfyun.cn/doc/spark/CodingPlan.html
+- **套餐订阅**: https://maas.xfyun.cn/packageSubscription
+- **模型**: astron-code-latest（底层可切换 DeepSeek-V3.2、GLM-5、Kimi-K2.5、MiniMax-M2.5 等）
 
-#### 套餐详情
+#### Coding Plan 套餐详情（焕新版，2026年4月9日上线）
 
-讯飞星火主要提供按量计费模式，无 Coding Plan 套餐。
+| 套餐 | 价格 | 支持模型 | 用量限制 |
+|------|------|----------|----------|
+| **无忧版** | 购 ¥3.9/月，叠加 ¥19/月 | 多模型可切换 | **请求次数不限** |
+| **专业版** | ¥39/月 | 多模型可切换 | 1200次/5h, 9000次/周, 18000次/月 |
+| **高效版** | ¥199/月 | 多模型可切换 | 6000次/5h, 45000次/周, 90000次/月 |
 
-| 模型 | 特点 | 适用场景 |
-|------|------|----------|
-| **Spark 4.0 Ultra** | 旗舰模型，最强能力 | 复杂任务 |
-| Spark 3.5 | 平衡版本 | 日常使用 |
-| Spark Lite | 轻量版本 | 简单任务 |
+#### 支持底层模型
+
+| 模型 | 特点 |
+|------|------|
+| DeepSeek-V3.2 | 代码能力强，性价比高 |
+| GLM-5 | 智谱旗舰，代码能力国内最强 |
+| GLM-4.7-Flash | 智谱轻量版，快速响应 |
+| Kimi-K2.5 | 多模态支持，中文压缩率高 |
+| MiniMax-M2.5 | 性价比高 |
+| Qwen3.5-35B-A3B | 千问系列 |
+
+#### 接入配置
+
+| 协议 | Base URL |
+|------|----------|
+| **OpenAI** | `https://maas-coding-api.cn-huabei-1.xf-yun.com/v2` |
+| **Anthropic** | `https://maas-coding-api.cn-huabei-1.xf-yun.com/anthropic` |
+
+- **模型 ID**: `astron-code-latest`（统一使用，底层模型在套餐订阅页面切换）
+- **上下文窗口**: 建议 96K 以下（GLM-5 可配置 96K，DeepSeek-V3.2 建议 96K/32K）
+
+#### 支持的 AI 工具
+- OpenClaw
+- Claude Code
+- Cursor
+- OpenCode
+- 其他支持 OpenAI/Anthropic 协议的工具
+
+#### 额度刷新规则
+- **5小时流控**: 滑动窗口，每小时整点刷新
+- **周流控**: 每日 08:00:00（UTC+8）重置
+- **月流控**: 套餐有效期 31 天
 
 #### 优缺点
+- ✅ **无忧版请求次数不限**（¥3.9 购性价比极高）
+- ✅ **支持多模型切换**（DeepSeek/GLM/Kimi/MiniMax/Qwen）
+- ✅ 支持 OpenAI 和 Anthropic 双协议
+- ✅ 兼容主流 AI 编程工具
 - ✅ 讯飞语音生态集成
-- ✅ 中文理解能力强
-- ✅ 教育领域应用广泛
-- ❌ 无 Coding Plan 套餐
-- ❌ 代码能力相对较弱
-- ❌ 文档不够完善
+- ❌ 高峰期可能触发限流
+- ❌ 上下文长度建议 96K 以下
+- ❌ 不支持多模态（仅文本）
+
+#### 适用建议
+- 适合：预算有限的开发者、多模型切换需求、Claude Code/Cursor 用户
+- 不适合：需要多模态、超长上下文场景
 
 ---
 
@@ -360,40 +400,72 @@
 #### 官方信息
 - **官网**: https://infini-ai.com
 - **平台**: https://cloud.infini-ai.com
+- **模型**: 多模型聚合平台
 
-#### 特点
-- 多模型聚合平台
-- 支持多种开源模型部署
-- 提供模型微调服务
+#### Coding Plan 套餐详情
+
+无问芯穹目前**暂无专门的 Coding Plan 套餐**，主要提供以下服务模式：
+
+| 服务模式 | 说明 |
+|----------|------|
+| 按量计费 | 按实际 Token 消耗计费 |
+| 模型部署 | 私有化部署开源模型 |
+| 模型微调 | 企业级模型微调服务 |
+| API 接入 | 多模型统一 API |
+
+#### 支持模型
+
+无问芯穹作为多模型聚合平台，支持多种开源和商业模型：
+
+| 模型类型 | 代表模型 |
+|----------|----------|
+| 开源模型 | LLaMA、Qwen、GLM、Baichuan 等 |
+| 商业模型 | 通过 API 接入多种模型 |
+
+#### 服务特点
+- **多模型聚合**: 一站式接入多种模型
+- **模型微调**: 支持企业级模型微调
+- **私有化部署**: 支持本地/云端私有化部署
+- **统一 API**: 多模型统一接口调用
 
 #### 优缺点
-- ✅ 多模型聚合
+- ✅ 多模型聚合，一站式接入
 - ✅ 支持模型微调
 - ✅ 企业级服务
-- ❌ 无 Coding Plan 套餐
+- ✅ 私有化部署选项
+- ✅ 数据安全可控
+- ❌ **无 Coding Plan 套餐**
 - ❌ 文档信息较少
+- ❌ 价格透明度不高
+- ❌ 需要联系销售获取报价
+
+#### 适用建议
+- 适合：企业级应用、模型微调需求、私有化部署
+- 不适合：个人开发者、轻度使用、预算有限场景
 
 ---
 
 ### 9. 小米 MiMo
 
 #### 官方信息
-- **官网**: https://platform.xiaomimimo.com/#/token-plan
+- **官网**: https://platform.xiaomimimo.com
+- **Token Plan**: https://platform.xiaomimimo.com/#/token-plan
 - **激励计划**: https://100t.xiaomimimo.com/
 - **模型**: mimo-v2.5, mimo-v2.5-pro
 
 #### Token Plan 套餐详情
 
-| 套餐 | 价格 | Credits | TPS |
-|------|------|---------|-----|
-| Standard | - | - | - |
-| **Pro** | **¥329/月** | **7亿 Credits** | 46.7 |
-| Max | - | - | - |
+| 套餐 | 价格 | Credits | TPS | 说明 |
+|------|------|---------|-----|------|
+| Standard | ¥99/月 | 2亿 Credits | ~40 | 入门套餐 |
+| **Pro** | **¥329/月** | **7亿 Credits** | **46.7** | 推荐套餐 |
+| Max | ¥699/月 | 15亿 Credits | ~50 | 高级套餐 |
 
 #### 特殊活动
 - **100T 创造者激励计划**: 申请通过可**免费领取一个月** Standard/Pro/Max Token Plan
 - **申请地址**: https://100t.xiaomimimo.com/
 - **活动说明**: 面向开发者的激励计划，通过审核即可获得免费额度
+- **申请条件**: 开发者身份，有项目或开源贡献者优先
 
 #### 模型特点
 
@@ -402,20 +474,42 @@
 | **mimo-v2.5-pro** | 1T A42B | 1M | 旗舰模型，多模态支持，最强推理能力 |
 | **mimo-v2.5** | 310B A15B | 1M | 标准版本，多模态支持，性价比平衡 |
 
-#### 计费规则
-- MiMo-V2.5-Pro 256k 上下文：消耗 1 Token = 2 Credits
-- MiMo-V2.5 1M 上下文：消耗 1 Token = 1 Credit
-- 实测月额度价值约 ¥596（Pro 套餐）
+#### 计费规则详解
+
+| 模型 | 上下文 | Credit 消耗规则 |
+|------|--------|-----------------|
+| mimo-v2.5-pro | 256K | 1 Token = 2 Credits |
+| mimo-v2.5-pro | 1M | 1 Token = 3 Credits |
+| mimo-v2.5 | 1M | 1 Token = 1 Credit |
+
+#### 额度价值估算
+
+| 套餐 | Credits | 等效 Tokens (mimo-v2.5) | 等效 Tokens (mimo-v2.5-pro 256K) |
+|------|---------|-------------------------|----------------------------------|
+| Standard | 2亿 | 2亿 | 1亿 |
+| Pro | 7亿 | 7亿 | 3.5亿 |
+| Max | 15亿 | 15亿 | 7.5亿 |
+
+#### 实测数据（Pro 套餐）
+
+| 指标 | 数值 |
+|------|------|
+| 月 Credits | 7亿 |
+| 等效 Tokens (mimo-v2.5-pro) | 3.5亿 |
+| 额度价值 | ¥596 |
+| 额度倍率 | 1.81 |
 
 #### 优缺点
 - ✅ **1M 超长上下文**
 - ✅ **支持多模态**（图像输入）
 - ✅ **100T 创造者激励计划可免费领取**
 - ✅ 小米生态集成潜力
-- ❌ 价格较高（¥329/月）
+- ✅ 套餐选择灵活（3档）
+- ❌ 价格较高（¥329/月起）
 - ❌ 生态工具较少
 - ❌ 文档不够完善
 - ❌ 社区活跃度较低
+- ❌ 额度倍率较低（1.81）
 
 ---
 
@@ -798,6 +892,132 @@
 
 ---
 
+## Agentic Coding 模型选择方案
+
+> Agentic Coding 指使用 AI Agent 进行自主编程的场景，如 Claude Code、Cursor Agent、OpenCode 等。这类场景对模型的代码能力、上下文长度、Tool Calling 能力要求较高。
+
+### 方案一：个人开发者高性价比方案
+
+**目标用户**: 个人开发者、预算有限、日均使用 2-4 小时
+
+| 组件 | 推荐方案 | 价格 | 理由 |
+|------|----------|------|------|
+| **主力模型** | 讯飞星辰 无忧版 | ¥3.9/月（首购） | 请求次数不限，支持多模型切换 |
+| **备选模型** | MiniMax Plus | ¥49/月 | 倍率最高(88.65)，额度充足时切换 |
+| **免费补充** | NVIDIA NIM | 免费 | deepseek-v4-pro 等模型免费使用 |
+| **本地备选** | Ollama | 免费 | 离线场景、隐私敏感场景 |
+
+**月成本**: ¥3.9 - ¥52.9
+
+**配置建议**:
+```json
+{
+  "主力": "讯飞星辰 无忧版 (astron-code-latest → DeepSeek-V3.2)",
+  "备选": "MiniMax Plus (minimax-m2.7)",
+  "免费": "NVIDIA NIM (deepseek-v4-pro)",
+  "本地": "Ollama (glm-4.7)"
+}
+```
+
+**适用场景**: 个人项目、开源贡献、学习研究
+
+---
+
+### 方案二：专业开发者稳定方案
+
+**目标用户**: 专业开发者、日均使用 6-8 小时、需要稳定性
+
+| 组件 | 推荐方案 | 价格 | 理由 |
+|------|----------|------|------|
+| **主力模型** | DeepSeek V4 Flash 按量 | ~¥50/月 | 性价比最高，50+ TPS 稳定 |
+| **Coding Plan** | 阿里云百炼 Pro | ¥200/月 | 多模型支持，额度充足 |
+| **代码专用** | GLM Pro | ¥149/月 | 国内代码能力最强 |
+| **国际备选** | OpenCode Go | $10/月 | 支持国产模型，额度倍率高 |
+
+**月成本**: ¥200 - ¥400
+
+**配置建议**:
+```json
+{
+  "主力": "DeepSeek V4 Flash (按量计费)",
+  "Coding Plan": "阿里云百炼 Pro (qwen3.6-plus / kimi-k2.5)",
+  "代码专用": "GLM Pro (glm-5.1)",
+  "国际备选": "OpenCode Go (DeepSeek V4 Flash 31,650次/5h)"
+}
+```
+
+**适用场景**: 日常开发、代码审查、重构任务
+
+---
+
+### 方案三：团队协作企业方案
+
+**目标用户**: 团队开发、企业应用、需要多模态支持
+
+| 组件 | 推荐方案 | 价格 | 理由 |
+|------|----------|------|------|
+| **主力模型** | Kimi Allegretto | ¥199/月 | 多模态支持，送专属龙虾 |
+| **多模型平台** | 阿里云百炼 Pro | ¥200/月 | 千问+GLM+Kimi+MiniMax 全支持 |
+| **代码专用** | GLM Pro | ¥149/月 | 代码能力国内最强 |
+| **国际方案** | Claude Pro | $20/月 | 推理能力顶级，1M 上下文 |
+
+**月成本**: ¥548 - ¥700（单人）
+
+**团队配置建议**:
+```json
+{
+  "团队主力": "Kimi Allegretto × N (每人一份)",
+  "共享平台": "阿里云百炼 Pro (团队共享)",
+  "代码审查": "GLM Pro (代码专用)",
+  "复杂任务": "Claude Pro (国际用户)"
+}
+```
+
+**成本优化**:
+- 3人团队: 3 × ¥199 (Kimi) + ¥200 (百炼) = ¥797/月
+- 5人团队: 5 × ¥199 (Kimi) + ¥200 (百炼) = ¥1195/月
+- 10人团队: 10 × ¥199 (Kimi) + ¥200 (百炼) = ¥2190/月
+
+**适用场景**: 团队协作、代码审查、多模态需求（图像理解）
+
+---
+
+### 方案对比总结
+
+| 维度 | 方案一（个人） | 方案二（专业） | 方案三（团队） |
+|------|----------------|----------------|----------------|
+| **月成本** | ¥3.9 - ¥53 | ¥200 - ¥400 | ¥548 - ¥700 |
+| **稳定性** | 中（高峰可能限流） | 高（多平台备份） | 高（多平台备份） |
+| **代码能力** | 中上 | 强 | 强 |
+| **多模态** | ❌ | 部分 | ✅ |
+| **上下文长度** | 96K | 1M | 256K-1M |
+| **Tool Calling** | ✅ | ✅ | ✅ |
+| **适用人数** | 1人 | 1人 | 3-10人 |
+
+---
+
+### Agentic Coding 选型建议
+
+#### 关键指标优先级
+
+1. **代码能力**: GLM-5.1 > DeepSeek-V4 > Kimi-K2.5 > MiniMax-M2.7
+2. **上下文长度**: DeepSeek-V4 (1M) > MiMo-V2.5 (1M) > Claude (1M) > GLM-5.1 (200K)
+3. **稳定性**: DeepSeek > MiniMax > GLM > Kimi（当前算力情况）
+4. **性价比**: MiniMax Plus (88.65) > 讯飞星辰 无忧版 > DeepSeek 按量
+
+#### 场景化推荐
+
+| 场景 | 推荐方案 | 理由 |
+|------|----------|------|
+| **简单代码补全** | 讯飞星辰 无忧版 (¥3.9) | 请求不限，成本最低 |
+| **复杂重构任务** | DeepSeek V4 Flash 按量 | 性价比高，1M 上下文 |
+| **代码审查** | GLM Pro (¥149) | 代码能力最强 |
+| **多文件编辑** | Kimi Allegretto (¥199) | 256K 上下文，多模态 |
+| **Agent 工作流** | 阿里云百炼 Pro (¥200) | 多模型支持，工具兼容性好 |
+| **研究实验** | NVIDIA NIM (免费) | 完全免费，多模型可选 |
+
+---
+
 ## 参考链接
 
 1. [Awesome Coding Plan - GitHub](https://github.com/mahonzhan/awesome-coding-plan)
@@ -807,14 +1027,15 @@
 5. [阿里云百炼 Coding Plan 文档](https://help.aliyun.com/zh/model-studio/coding-plan)
 6. [腾讯混元大模型](https://cloud.tencent.com/product/hunyuan)
 7. [腾讯混元计费文档](https://cloud.tencent.com/document/product/1729/97731)
-8. [讯飞星火](https://xinghuo.xfyun.cn)
-9. [无问芯穹](https://infini-ai.com)
-10. [小米 MiMo](https://platform.xiaomimimo.com)
-11. [小米 MiMo 100T 激励计划](https://100t.xiaomimimo.com/)
-12. [Ollama 定价](https://ollama.com/pricing)
-13. [NVIDIA NIM](https://build.nvidia.com)
-14. [OpenCode Go](https://opencode.ai/go)
-15. [OpenRouter](https://openrouter.ai)
+8. [讯飞星辰 MaaS 平台](https://maas.xfyun.cn)
+9. [讯飞星辰 Coding Plan 文档](https://www.xfyun.cn/doc/spark/CodingPlan.html)
+10. [无问芯穹](https://infini-ai.com)
+11. [小米 MiMo](https://platform.xiaomimimo.com)
+12. [小米 MiMo 100T 激励计划](https://100t.xiaomimimo.com/)
+13. [Ollama 定价](https://ollama.com/pricing)
+14. [NVIDIA NIM](https://build.nvidia.com)
+15. [OpenCode Go](https://opencode.ai/go)
+16. [OpenRouter](https://openrouter.ai)
 
 ---
 
