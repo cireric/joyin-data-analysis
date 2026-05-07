@@ -2,6 +2,7 @@
 """图片下载器"""
 
 import asyncio
+import logging
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -13,6 +14,8 @@ try:
 except ImportError:
     aiohttp = None
     aiofiles = None
+
+logger = logging.getLogger(__name__)
 
 
 async def download_single_image(
@@ -55,7 +58,7 @@ async def download_single_image(
                 
                 return True
     except Exception as e:
-        print(f"[ERROR] 下载图片失败 {url}: {e}")
+        logger.error(f"下载图片失败 {url}: {e}")
         return False
 
 

@@ -8,7 +8,7 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
 
 def random_delay(base_delay: float = 2.0, max_delay: float = 5.0) -> float:

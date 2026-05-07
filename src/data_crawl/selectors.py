@@ -3,7 +3,6 @@
 
 from enum import Enum
 from typing import Dict, Any, Optional
-from urllib.parse import urlparse
 
 
 class Platform(Enum):

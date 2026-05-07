@@ -180,9 +180,8 @@ async def crawl_list_page(
         
         for i, link in enumerate(links, 1):
             print(f"\n抓取进度: [{i}/{total}] | 当前: {link}")
-            
-            actual_delay = random_delay(delay, max_delay)
-            print(f"[INFO] 延迟 {actual_delay:.1f} 秒...")
+            print(f"[INFO] 延迟 {max(0.5, delay):.1f} 秒...")
+            actual_delay = random_delay(max(0.5, delay), max_delay)
             
             success = await crawl_single_article(
                 link,
@@ -239,8 +238,6 @@ async def main():
     parser.add_argument("--delay", type=float, default=2.0, help="基础延迟秒数 (默认: 2)")
     parser.add_argument("--max-delay", type=float, default=5.0, help="最大延迟秒数 (默认: 5)")
     parser.add_argument("--no-randomize", action="store_true", help="禁用随机延迟")
-    parser.add_argument("--cookies", help="加载 cookies 文件")
-    parser.add_argument("--save-cookies", help="保存 cookies 到文件")
     parser.add_argument("--resume", action="store_true", help="断点续传")
     parser.add_argument("--state", default="url2md-state.json", help="状态文件路径")
     

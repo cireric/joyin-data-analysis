@@ -1,12 +1,17 @@
 # src/data_crawl/extractor.py
 """内容提取器：文章提取、列表提取、Markdown 转换"""
 
+import asyncio
+import logging
+import random
 import re
 from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urljoin
 
-from .selectors import Platform, get_platform_config
+from .selectors import Platform, get_platform_config, is_article_page
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -84,7 +89,7 @@ async def extract_article(page, platform: Platform) -> Optional[ArticleData]:
             images=images,
         )
     except Exception as e:
-        print(f"[ERROR] 提取文章失败: {e}")
+        logger.error(f"提取文章失败: {e}")
         return None
 
 
@@ -105,7 +110,6 @@ async def extract_list_links(page, platform: Platform, scroll: bool = True) -> L
     links = set()
     
     if scroll and config.get("needs_scroll", False):
-        import random
         prev_count = 0
         no_change_count = 0
         
@@ -113,7 +117,6 @@ async def extract_list_links(page, platform: Platform, scroll: bool = True) -> L
             scroll_distance = random.randint(300, 800)
             await page.evaluate(f'window.scrollBy(0, {scroll_distance})')
             
-            import asyncio
             await asyncio.sleep(random.uniform(0.5, 1.5))
             
             elements = await page.query_selector_all(link_selector)
@@ -136,7 +139,6 @@ async def extract_list_links(page, platform: Platform, scroll: bool = True) -> L
                 full_url = urljoin(page.url, href)
                 links.add(full_url)
     
-    from .selectors import is_article_page
     article_links = [link for link in links if is_article_page(link, platform)]
     
     return list(set(article_links))
