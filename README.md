@@ -124,6 +124,8 @@ python scripts/url2md.py <url> --resume --state state.json
 python scripts/url2md.py <url> --delay 3 --max-delay 8
 ```
 
+**注意：** 首次使用需要确保系统已安装 Chrome 浏览器。
+
 **参数说明：**
 
 | 参数 | 说明 | 默认值 |
