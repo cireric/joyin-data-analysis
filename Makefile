@@ -1,4 +1,4 @@
-.PHONY: analyze clean crawl md2word md2pdf help
+.PHONY: analyze clean crawl md2word md2pdf pdf2word help
 
 help:
 	@echo Available commands:
@@ -10,7 +10,9 @@ help:
 	@echo   make crawl url=URL limit=10                   # Limit articles
 	@echo   make crawl url=URL download=1                 # Download images
 	@echo   make md2word input.md [ARGS]                  # Markdown to Word
-	@echo   make md2pdf ARGS="--help"                     # Markdown to PDF
+	@echo   make md2pdf input.md [ARGS]                   # Markdown to PDF (single file)
+	@echo   make md2pdf-batch dir=docs [ARGS]             # Markdown to PDF (batch)
+	@echo   make pdf2word input.pdf [ARGS]                # PDF to Word
 	@echo   make clean                                     # Clean output
 	@echo   make help                                      # Show this help
 
@@ -24,7 +26,16 @@ md2word:
 	@.venv\Scripts\python.exe scripts/md2word.py $(filter-out $@,$(MAKECMDGOALS))
 
 md2pdf:
-	@.venv\Scripts\python.exe scripts/md2pdf.py $(ARGS)
+	@.venv\Scripts\python.exe scripts/md2pdf.py $(filter-out $@,$(MAKECMDGOALS))
+
+md2pdf-batch:
+	@.venv\Scripts\python.exe scripts/md2pdf.py --batch $(dir) $(if $(output),--output $(output)) $(if $(recursive),--recursive) $(if $(force),--force) $(if $(toc),--toc)
+
+pdf2word:
+	@.venv\Scripts\python.exe scripts/pdf2word.py $(filter-out $@,$(MAKECMDGOALS))
 
 clean:
 	@.venv\Scripts\python.exe scripts/cleanup.py
+
+%:
+	@:

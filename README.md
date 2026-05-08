@@ -152,7 +152,7 @@ python scripts/url2md.py <url> --delay 3 --max-delay 8
 Convert Markdown files to PDF documents.
 
 ```bash
-# Basic usage
+# Single file
 python scripts/md2pdf.py input.md
 
 # Specify output path
@@ -167,6 +167,15 @@ python scripts/md2pdf.py input.md --pdf-engine xelatex
 # Force overwrite
 python scripts/md2pdf.py input.md --force
 
+# Batch convert folder
+python scripts/md2pdf.py --batch docs/
+
+# Batch with output directory
+python scripts/md2pdf.py --batch docs/ --output pdfs/
+
+# Recursive batch convert
+python scripts/md2pdf.py --batch docs/ --recursive
+
 # Debug mode
 python scripts/md2pdf.py input.md --debug
 ```
@@ -176,6 +185,7 @@ python scripts/md2pdf.py input.md --debug
 - YAML frontmatter support for metadata extraction (title, author, date)
 - Automatic PDF engine detection
 - Table of contents generation
+- Batch conversion with progress display
 
 **Dependencies:**
 - pandoc (required)
@@ -205,8 +215,13 @@ data_analysis/
 │   ├── run_analysis.py # 主分析脚本
 │   ├── pdf2word.py     # PDF转Word
 │   ├── md2word.py      # Markdown转Word
+│   ├── md2pdf.py       # Markdown转PDF
 │   ├── url2md.py       # URL转Markdown
-│   └── cleanup.py      # 清理脚本
+│   ├── cleanup.py      # 清理脚本
+│   └── lib/            # 库模块
+│       ├── converter_base.py # 转换器基础模块
+│       ├── period_parser.py  # 周期解析器
+│       └── file_validator.py # 文件验证器
 ├── .opencode/skills/   # OpenCode Skills
 │   └── url2md/         # URL转Markdown Skill
 ├── tests/              # 单元测试

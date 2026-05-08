@@ -17,8 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from data_analysis import generate_report
-from period_parser import PeriodParser, PeriodInfo
-from file_validator import FileValidator
+from lib.period_parser import PeriodParser, PeriodInfo
+from lib.file_validator import FileValidator
 
 try:
     sys.stdout.reconfigure(encoding='utf-8')
