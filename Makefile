@@ -24,7 +24,7 @@ md2word:
 	@.venv\Scripts\python.exe scripts/md2word.py $(filter-out $@,$(MAKECMDGOALS))
 
 md2pdf:
-	@python scripts/md2pdf.py $(ARGS)
+	@.venv\Scripts\python.exe scripts/md2pdf.py $(ARGS)
 
 clean:
 	@.venv\Scripts\python.exe scripts/cleanup.py
