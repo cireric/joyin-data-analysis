@@ -77,7 +77,8 @@ async def extract_article(page, platform: Platform) -> Optional[ArticleData]:
         img_elements = await page.query_selector_all(f"{article_selector} img" if article_selector else "img")
         for img in img_elements:
             src = await img.get_attribute("data-src") or await img.get_attribute("src")
-            if src and not src.startswith("data:"):
+            if src and not src.startswith("data:") and "mmbiz.qpic.cn" in src:
+                src = src.split('&amp;')[0]
                 images.append(src)
         
         return ArticleData(
@@ -182,15 +183,28 @@ def convert_to_markdown(article: ArticleData, image_dir: Optional[str] = None) -
     content = re.sub(r'<br\s*/?>', '\n', content)
     content = re.sub(r'<p[^>]*>', '', content)
     content = re.sub(r'</p>', '\n\n', content)
-    content = re.sub(r'<strong[^>]*>(.*?)</strong>', r'**\1**', content)
-    content = re.sub(r'<b[^>]*>(.*?)</b>', r'**\1**', content)
-    content = re.sub(r'<em[^>]*>(.*?)</em>', r'*\1*', content)
-    content = re.sub(r'<i[^>]*>(.*?)</i>', r'*\1*', content)
-    content = re.sub(r'<h1[^>]*>(.*?)</h1>', r'# \1\n\n', content)
-    content = re.sub(r'<h2[^>]*>(.*?)</h2>', r'## \1\n\n', content)
-    content = re.sub(r'<h3[^>]*>(.*?)</h3>', r'### \1\n\n', content)
+    content = re.sub(r'<section[^>]*>', '', content)
+    content = re.sub(r'</section>', '\n', content)
+    content = re.sub(r'<strong[^>]*>(.*?)</strong>', r'**\1**', content, flags=re.DOTALL)
+    content = re.sub(r'<b[^>]*>(.*?)</b>', r'**\1**', content, flags=re.DOTALL)
+    content = re.sub(r'<em[^>]*>(.*?)</em>', r'*\1*', content, flags=re.DOTALL)
+    content = re.sub(r'<i[^>]*>(.*?)</i>', r'*\1*', content, flags=re.DOTALL)
+    content = re.sub(r'<h1[^>]*>(.*?)</h1>', r'# \1\n\n', content, flags=re.DOTALL)
+    content = re.sub(r'<h2[^>]*>(.*?)</h2>', r'## \1\n\n', content, flags=re.DOTALL)
+    content = re.sub(r'<h3[^>]*>(.*?)</h3>', r'### \1\n\n', content, flags=re.DOTALL)
+    
     content = re.sub(r'<img[^>]*src=["\']([^"\']+)["\'][^>]*alt=["\']([^"\']*)["\'][^>]*/?>', r'![\2](\1)', content)
     content = re.sub(r'<img[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']([^"\']+)["\'][^>]*/?>', r'![\1](\2)', content)
+    content = re.sub(r'<img[^>]*data-src=["\']([^"\']+)["\'][^>]*/?>', r'![image](\1)', content)
+    content = re.sub(r'<img[^>]*src=["\']([^"\']+)["\'][^>]*/?>', r'![image](\1)', content)
+    
+    content = re.sub(r'!\[.*?\]\(data:image[^)]+\)', '', content)
+    
+    content = re.sub(r'&nbsp;', ' ', content)
+    content = re.sub(r'&amp;', '&', content)
+    content = re.sub(r'&lt;', '<', content)
+    content = re.sub(r'&gt;', '>', content)
+    content = re.sub(r'&quot;', '"', content)
     
     content = re.sub(r'<[^>]+>', '', content)
     
