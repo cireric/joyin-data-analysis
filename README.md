@@ -147,6 +147,40 @@ python scripts/url2md.py <url> --delay 3 --max-delay 8
 - 简书
 - 通用网页（自动识别）
 
+### Markdown to PDF
+
+Convert Markdown files to PDF documents.
+
+```bash
+# Basic usage
+python scripts/md2pdf.py input.md
+
+# Specify output path
+python scripts/md2pdf.py input.md -o output.pdf
+
+# Generate table of contents
+python scripts/md2pdf.py input.md --toc
+
+# Specify PDF engine
+python scripts/md2pdf.py input.md --pdf-engine xelatex
+
+# Force overwrite
+python scripts/md2pdf.py input.md --force
+
+# Debug mode
+python scripts/md2pdf.py input.md --debug
+```
+
+**Features:**
+- Automatic Chinese content detection with appropriate engine and font selection
+- YAML frontmatter support for metadata extraction (title, author, date)
+- Automatic PDF engine detection
+- Table of contents generation
+
+**Dependencies:**
+- pandoc (required)
+- PDF engine (any one): weasyprint (default), xelatex, wkhtmltopdf, pdflatex
+
 ## 目录结构
 
 ```
