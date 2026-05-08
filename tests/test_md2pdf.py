@@ -88,6 +88,16 @@ class TestSelectPdfEngine:
         except EngineNotFoundError:
             pytest.skip("No PDF engines available")
 
+    def test_select_pdf_engine_no_engine_available(self, monkeypatch):
+        import lib.converter_base
+        monkeypatch.setattr(
+            lib.converter_base,
+            "get_available_pdf_engines",
+            lambda: []
+        )
+        with pytest.raises(EngineNotFoundError):
+            select_pdf_engine("English", None, debug=False)
+
 
 class TestConvertMdToPdf:
     def test_convert_md_to_pdf_creates_file(self, tmp_path):

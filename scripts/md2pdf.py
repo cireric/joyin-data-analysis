@@ -22,6 +22,7 @@ except AttributeError:
 
 sys.path.insert(0, str(Path(__file__).parent))
 from lib.converter_base import (
+    PDF_ENGINE_PRIORITY,
     detect_chinese,
     find_pandoc,
     get_available_pdf_engines,
@@ -60,9 +61,6 @@ class DependencyError(Md2PdfError):
 class EngineNotFoundError(Md2PdfError):
     """PDF引擎未找到异常"""
     pass
-
-
-PDF_ENGINE_PRIORITY = ["weasyprint", "xelatex", "wkhtmltopdf", "pdflatex"]
 
 
 def parse_args(args=None):
