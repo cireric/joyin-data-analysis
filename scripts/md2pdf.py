@@ -173,9 +173,10 @@ def convert_md_to_pdf(
     css_file = None
     if selected_engine == "wkhtmltopdf":
         css_content = """
-body { background-color: white; }
-img { max-width: 600px; max-height: 800px; display: block; margin: 1em auto; }
+body { background-color: white; margin: 0; padding: 20px; }
+img { width: 480px; height: 600px; display: block; margin: 1em auto; object-fit: contain; }
 figure { margin: 1em 0; text-align: center; }
+p, h1, h2, h3, h4, h5, h6 { margin: 0.5em 0; }
 """
         css_file = output_path.with_suffix(".temp.css")
         css_file.write_text(css_content, encoding="utf-8")
