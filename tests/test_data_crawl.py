@@ -169,6 +169,11 @@ class TestPlatformSelectors:
         assert is_article_page("https://mp.weixin.qq.com/s/abc", Platform.WECHAT) == True
         assert is_article_page("https://mp.weixin.qq.com/mp/profile_ext", Platform.WECHAT) == False
 
+    def test_is_list_page_wechat(self):
+        from src.data_crawl.selectors import is_list_page
+        assert is_list_page("https://mp.weixin.qq.com/mp/profile_ext?action=home", Platform.WECHAT) == True
+        assert is_list_page("https://mp.weixin.qq.com/s/abc", Platform.WECHAT) == False
+
 
 from src.data_crawl.extractor import (
     extract_article,
@@ -216,6 +221,58 @@ class TestExtractArticle:
         
         assert result is None
 
+    @pytest.mark.asyncio
+    async def test_extract_article_filters_wechat_images(self):
+        mock_page = AsyncMock()
+        mock_page.title = AsyncMock(return_value="测试")
+        mock_page.url = "https://mp.weixin.qq.com/s/abc"
+        
+        async def mock_query_selector(selector):
+            mock_elem = AsyncMock()
+            if selector == "#js_content":
+                mock_elem.inner_html = AsyncMock(return_value="<p>内容</p>")
+            else:
+                return None
+            return mock_elem
+        
+        mock_page.query_selector = AsyncMock(side_effect=mock_query_selector)
+        
+        mock_img1 = AsyncMock()
+        mock_img1.get_attribute = AsyncMock(side_effect=["https://mmbiz.qpic.cn/test.jpg", None])
+        mock_img2 = AsyncMock()
+        mock_img2.get_attribute = AsyncMock(side_effect=["data:image/svg+xml,test", None])
+        mock_img3 = AsyncMock()
+        mock_img3.get_attribute = AsyncMock(side_effect=["https://example.com/img.jpg", None])
+        
+        mock_page.query_selector_all = AsyncMock(return_value=[mock_img1, mock_img2, mock_img3])
+        
+        result = await extract_article(mock_page, Platform.WECHAT)
+        
+        assert result is not None
+        assert len(result.images) == 1
+        assert "mmbiz.qpic.cn" in result.images[0]
+
+
+class TestExtractListLinks:
+    @pytest.mark.asyncio
+    async def test_extract_list_links_basic(self):
+        mock_page = AsyncMock()
+        mock_page.url = "https://mp.weixin.qq.com/mp/profile_ext?action=home"
+        
+        mock_elem1 = AsyncMock()
+        mock_elem1.get_attribute = AsyncMock(return_value="/s/abc123")
+        mock_elem2 = AsyncMock()
+        mock_elem2.get_attribute = AsyncMock(return_value="/s/def456")
+        mock_elem3 = AsyncMock()
+        mock_elem3.get_attribute = AsyncMock(return_value="/mp/other")
+        
+        mock_page.query_selector_all = AsyncMock(return_value=[mock_elem1, mock_elem2, mock_elem3])
+        
+        result = await extract_list_links(mock_page, Platform.WECHAT, scroll=False)
+        
+        assert len(result) == 2
+        assert all("/s/" in link for link in result)
+
 
 class TestConvertToMarkdown:
     def test_convert_basic_article(self):
@@ -246,6 +303,61 @@ class TestConvertToMarkdown:
         markdown = convert_to_markdown(article)
         
         assert "![图片](https://example.com/img.jpg)" in markdown
+
+    def test_convert_section_tags(self):
+        article = ArticleData(
+            title="测试",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content="<section>段落1</section><section>段落2</section>",
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "段落1" in markdown
+        assert "段落2" in markdown
+
+    def test_convert_html_entities(self):
+        article = ArticleData(
+            title="测试",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content="<p>空格&nbsp;和&amp;符号</p>",
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "空格 和" in markdown
+        assert "&" in markdown
+
+    def test_filter_data_image_urls(self):
+        article = ArticleData(
+            title="测试",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content='<img src="data:image/svg+xml,test">',
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "data:image" not in markdown
+
+    def test_convert_bold_and_italic(self):
+        article = ArticleData(
+            title="测试",
+            author="作者",
+            date="2024-01-01",
+            url="https://example.com",
+            content="<p><strong>粗体</strong>和<em>斜体</em></p>",
+        )
+        
+        markdown = convert_to_markdown(article)
+        
+        assert "**粗体**" in markdown
+        assert "*斜体*" in markdown
 
 
 class TestArticleData:
