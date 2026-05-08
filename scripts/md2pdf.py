@@ -11,6 +11,7 @@ Markdown转PDF工具
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -163,12 +164,13 @@ def convert_md_to_pdf(
             print(f"找到 pandoc: {pandoc_path}")
 
     content = input_path.read_text(encoding="utf-8")
-    selected_engine = select_pdf_engine(content, pdf_engine, debug)
+    processed_content = re.sub(r'!\[[^\]]*\]', '![]', content)
+    selected_engine = select_pdf_engine(processed_content, pdf_engine, debug)
     frontmatter = parse_frontmatter(content)
 
     extra_args = ["--pdf-engine", selected_engine]
 
-    if detect_chinese(content):
+    if detect_chinese(processed_content):
         font = get_chinese_font()
         if font:
             extra_args.extend(["--variable", f"mainfont:{font}"])
@@ -187,13 +189,18 @@ def convert_md_to_pdf(
         print(f"转换参数: input={input_path}, output={output_path}")
         print(f"  extra_args={extra_args}")
 
+    temp_md = output_path.with_suffix(".temp.md")
     try:
+        temp_md.write_text(processed_content, encoding="utf-8")
         pypandoc.convert_file(
-            str(input_path), "pdf", outputfile=str(output_path), extra_args=extra_args
+            str(temp_md), "pdf", outputfile=str(output_path), extra_args=extra_args
         )
         return True
     except Exception as e:
         raise ConversionError(f"转换失败: {e}")
+    finally:
+        if temp_md.exists():
+            temp_md.unlink()
 
 
 def main():
