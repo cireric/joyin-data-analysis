@@ -170,6 +170,7 @@ def convert_md_to_pdf(
 
     extra_args = ["--pdf-engine", selected_engine]
 
+    css_file = None
     if selected_engine == "wkhtmltopdf":
         css_content = """
 body { background-color: white; }
@@ -200,9 +201,6 @@ figure { margin: 1em 0; text-align: center; }
         print(f"  extra_args={extra_args}")
 
     temp_md = output_path.with_suffix(".temp.md")
-    css_file = None
-    if selected_engine == "wkhtmltopdf":
-        css_file = output_path.with_suffix(".temp.css")
     
     try:
         temp_md.write_text(processed_content, encoding="utf-8")
