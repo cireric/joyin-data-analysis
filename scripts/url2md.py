@@ -281,4 +281,14 @@ async def main():
 if __name__ == "__main__":
     import warnings
     warnings.filterwarnings("ignore", category=ResourceWarning)
-    asyncio.run(main())
+    
+    if sys.platform == "win32" and sys.version_info >= (3, 8):
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        import gc
+        gc.collect()

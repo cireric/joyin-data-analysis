@@ -21,6 +21,9 @@ from .extractor import extract_article, extract_list_links, convert_to_markdown,
 # Task 5: 导出图片下载器
 from .downloader import download_images, download_single_image
 
+# Task 6: 导出同步 API
+from .api import crawl_url, CrawlResult
+
 __all__ = [
     "random_delay",
     "sanitize_filename",
@@ -37,4 +40,6 @@ __all__ = [
     "convert_to_markdown",
     "download_images",
     "download_single_image",
+    "crawl_url",
+    "CrawlResult",
 ]

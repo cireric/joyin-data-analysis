@@ -7,11 +7,81 @@ import random
 import re
 from dataclasses import dataclass
 from typing import List, Optional
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 
 from .selectors import Platform, get_platform_config, is_article_page
 
 logger = logging.getLogger(__name__)
+
+
+def clean_image_url(url: str) -> str:
+    """
+    清理图片 URL，移除不必要的参数
+    
+    Args:
+        url: 原始 URL
+    
+    Returns:
+        清理后的 URL
+    """
+    if not url:
+        return url
+    
+    url = url.replace('&amp;', '&')
+    
+    try:
+        parsed = urlparse(url)
+        
+        keep_params = []
+        if parsed.query:
+            params = parse_qs(parsed.query)
+            for key in ['wx_fmt', 'tp']:
+                if key in params:
+                    keep_params.append((key, params[key][0]))
+        
+        if keep_params:
+            new_query = urlencode(keep_params)
+        else:
+            new_query = ''
+        
+        clean_url = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            parsed.params,
+            new_query,
+            ''
+        ))
+        
+        return clean_url
+    except Exception:
+        return url.split('?')[0].split('#')[0]
+
+
+def remove_noise_elements(content: str) -> str:
+    """
+    移除内容中的噪音元素（广告、推荐等）
+    
+    Args:
+        content: HTML 内容
+    
+    Returns:
+        清理后的内容
+    """
+    noise_patterns = [
+        (r'<div[^>]*class="[^"]*qr-code[^"]*"[^>]*>.*?</div>', ''),
+        (r'<div[^>]*class="[^"]*recommend[^"]*"[^>]*>.*?</div>', ''),
+        (r'<div[^>]*class="[^"]*ad[^"]*"[^>]*>.*?</div>', ''),
+        (r'<div[^>]*id="[^"]*ad[^"]*"[^>]*>.*?</div>', ''),
+        (r'<section[^>]*class="[^"]*mp_profile_popup[^"]*"[^>]*>.*?</section>', ''),
+        (r'<section[^>]*class="[^"]*js_ad[^"]*"[^>]*>.*?</section>', ''),
+        (r'<a[^>]*class="[^"]*appmsg_card[^"]*"[^>]*>.*?</a>', ''),
+    ]
+    
+    for pattern, replacement in noise_patterns:
+        content = re.sub(pattern, replacement, content, flags=re.DOTALL | re.IGNORECASE)
+    
+    return content
 
 
 @dataclass
@@ -42,6 +112,23 @@ async def extract_article(page, platform: Platform) -> Optional[ArticleData]:
     """
     try:
         config = get_platform_config(platform)
+        
+        await page.evaluate("""
+            async () => {
+                const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                const scrollHeight = document.documentElement.scrollHeight;
+                const viewportHeight = window.innerHeight;
+                const steps = Math.ceil(scrollHeight / viewportHeight);
+                
+                for (let i = 0; i < steps; i++) {
+                    window.scrollTo(0, viewportHeight * i);
+                    await delay(300);
+                }
+                window.scrollTo(0, 0);
+            }
+        """)
+        
+        await asyncio.sleep(0.5)
         
         title = ""
         title_selector = config.get("title_selector")
@@ -74,12 +161,21 @@ async def extract_article(page, platform: Platform) -> Optional[ArticleData]:
                 content = await content_elem.inner_html()
         
         images = []
-        img_elements = await page.query_selector_all(f"{article_selector} img" if article_selector else "img")
-        for img in img_elements:
-            src = await img.get_attribute("data-src") or await img.get_attribute("src")
-            if src and not src.startswith("data:") and "mmbiz.qpic.cn" in src:
-                src = src.split('&amp;')[0]
-                images.append(src)
+        img_selectors = []
+        if article_selector:
+            for sel in article_selector.split(","):
+                img_selectors.append(f"{sel.strip()} img")
+        else:
+            img_selectors = ["img"]
+        
+        for img_sel in img_selectors:
+            img_elements = await page.query_selector_all(img_sel)
+            for img in img_elements:
+                src = await img.get_attribute("data-src") or await img.get_attribute("src")
+                if src and not src.startswith("data:"):
+                    src = clean_image_url(src)
+                    if src and src not in images:
+                        images.append(src)
         
         return ArticleData(
             title=title.strip(),
@@ -145,6 +241,30 @@ async def extract_list_links(page, platform: Platform, scroll: bool = True) -> L
     return list(set(article_links))
 
 
+def convert_img_tag(img_tag: str) -> str:
+    """
+    将 img 标签转换为 Markdown 格式
+    
+    Args:
+        img_tag: img 标签字符串
+    
+    Returns:
+        Markdown 格式的图片
+    """
+    src_match = re.search(r'(?:data-)?src=["\']([^"\']+)["\']', img_tag)
+    alt_match = re.search(r'alt=["\']([^"\']*)["\']', img_tag)
+    
+    if not src_match:
+        return ''
+    
+    src = src_match.group(1)
+    alt = alt_match.group(1) if alt_match else 'image'
+    
+    src = clean_image_url(src)
+    
+    return f'\n![{alt}]({src}){{width="600"}}\n'
+
+
 def convert_to_markdown(article: ArticleData, image_dir: Optional[str] = None) -> str:
     """
     将文章转换为 Markdown 格式
@@ -172,13 +292,7 @@ def convert_to_markdown(article: ArticleData, image_dir: Optional[str] = None) -
     
     content = article.content
     
-    for i, img_url in enumerate(article.images):
-        if image_dir:
-            ext = img_url.split('.')[-1].split('?')[0] or 'jpg'
-            if len(ext) > 4:
-                ext = 'jpg'
-            local_path = f"{image_dir}/img_{i+1:03d}.{ext}"
-            content = content.replace(img_url, local_path)
+    content = remove_noise_elements(content)
     
     content = re.sub(r'<br\s*/?>', '\n', content)
     content = re.sub(r'<p[^>]*>', '', content)
@@ -193,10 +307,7 @@ def convert_to_markdown(article: ArticleData, image_dir: Optional[str] = None) -
     content = re.sub(r'<h2[^>]*>(.*?)</h2>', r'## \1\n\n', content, flags=re.DOTALL)
     content = re.sub(r'<h3[^>]*>(.*?)</h3>', r'### \1\n\n', content, flags=re.DOTALL)
     
-    content = re.sub(r'<img[^>]*src=["\']([^"\']+)["\'][^>]*alt=["\']([^"\']*)["\'][^>]*/?>', r'![\2](\1)', content)
-    content = re.sub(r'<img[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']([^"\']+)["\'][^>]*/?>', r'![\1](\2)', content)
-    content = re.sub(r'<img[^>]*data-src=["\']([^"\']+)["\'][^>]*/?>', r'![image](\1)', content)
-    content = re.sub(r'<img[^>]*src=["\']([^"\']+)["\'][^>]*/?>', r'![image](\1)', content)
+    content = re.sub(r'<img[^>]*>', lambda m: convert_img_tag(m.group(0)), content)
     
     content = re.sub(r'!\[.*?\]\(data:image[^)]+\)', '', content)
     

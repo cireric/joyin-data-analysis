@@ -22,6 +22,8 @@ async def download_single_image(
     url: str,
     save_path: str,
     timeout: int = 30,
+    session: Optional[object] = None,
+    referer: Optional[str] = None,
 ) -> bool:
     """
     下载单张图片
@@ -30,6 +32,8 @@ async def download_single_image(
         url: 图片 URL
         save_path: 保存路径
         timeout: 超时时间（秒）
+        session: aiohttp ClientSession（复用连接）
+        referer: Referer 头（防盗链）
     
     Returns:
         是否成功
@@ -38,17 +42,19 @@ async def download_single_image(
         raise ImportError("aiohttp not installed. Run: pip install aiohttp aiofiles")
     
     try:
-        # 确保目录存在
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as response:
+        headers = {}
+        if referer:
+            headers['Referer'] = referer
+        
+        async def do_download(sess):
+            async with sess.get(url, timeout=aiohttp.ClientTimeout(total=timeout), headers=headers) as response:
                 if response.status != 200:
                     return False
                 
                 content = await response.read()
                 
-                # 异步写入文件
                 if aiofiles:
                     async with aiofiles.open(save_path, 'wb') as f:
                         await f.write(content)
@@ -57,6 +63,13 @@ async def download_single_image(
                         f.write(content)
                 
                 return True
+        
+        if session:
+            return await do_download(session)
+        else:
+            async with aiohttp.ClientSession() as sess:
+                return await do_download(sess)
+                
     except Exception as e:
         logger.error(f"下载图片失败 {url}: {e}")
         return False
@@ -67,6 +80,7 @@ async def download_images(
     output_dir: str,
     article_title: str = "",
     max_concurrent: int = 3,
+    referer: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     批量下载图片
@@ -76,6 +90,7 @@ async def download_images(
         output_dir: 输出目录
         article_title: 文章标题（用于子目录名）
         max_concurrent: 最大并发数
+        referer: Referer 头（防盗链）
     
     Returns:
         URL 到本地路径的映射
@@ -83,7 +98,6 @@ async def download_images(
     if not image_urls:
         return {}
     
-    # 创建子目录
     if article_title:
         from .utils import sanitize_filename
         subdir = sanitize_filename(article_title)
@@ -94,39 +108,37 @@ async def download_images(
     results = {}
     semaphore = asyncio.Semaphore(max_concurrent)
     
-    async def download_with_semaphore(url: str, index: int):
+    async def download_with_semaphore(url: str, index: int, session):
         async with semaphore:
-            # 从 URL 提取扩展名
             parsed = urlparse(url)
             path = parsed.path.lower()
             
-            if '.png' in path:
+            ext = 'jpg'
+            if path.endswith('.png'):
                 ext = 'png'
-            elif '.gif' in path:
+            elif path.endswith('.gif'):
                 ext = 'gif'
-            elif '.webp' in path:
+            elif path.endswith('.webp'):
                 ext = 'webp'
-            elif '.jpeg' in path or '.jpg' in path:
+            elif path.endswith('.jpeg') or path.endswith('.jpg'):
                 ext = 'jpg'
-            else:
-                ext = 'jpg'  # 默认
             
             filename = f"img_{index:03d}.{ext}"
             save_path = os.path.join(output_dir, filename)
             
-            success = await download_single_image(url, save_path)
+            success = await download_single_image(url, save_path, session=session, referer=referer)
             
             if success:
                 return url, save_path
             return url, None
     
-    # 并发下载
-    tasks = [
-        download_with_semaphore(url, i + 1)
-        for i, url in enumerate(image_urls)
-    ]
-    
-    download_results = await asyncio.gather(*tasks)
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            download_with_semaphore(url, i + 1, session)
+            for i, url in enumerate(image_urls)
+        ]
+        
+        download_results = await asyncio.gather(*tasks)
     
     for url, local_path in download_results:
         if local_path:

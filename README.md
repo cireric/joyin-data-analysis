@@ -154,17 +154,27 @@ data_analysis/
 ├── data/               # 输入Excel文件
 │   └── 销售汇总表-*.xlsx
 ├── output/             # 输出报表（按日期分组）
-├── src/data_analysis/  # 核心库模块
-│   ├── loader.py       # 数据加载与验证
-│   ├── analyzer.py     # 数据分析函数
-│   ├── report.py       # 报表生成
-│   └── styler.py       # Excel样式
+├── src/
+│   ├── data_analysis/  # 数据分析模块
+│   │   ├── loader.py   # 数据加载与验证
+│   │   ├── analyzer.py # 数据分析函数
+│   │   ├── report.py   # 报表生成
+│   │   └── styler.py   # Excel样式
+│   └── data_crawl/     # 网页抓取模块
+│       ├── api.py      # 同步API入口
+│       ├── extractor.py # 内容提取
+│       ├── selectors.py # 平台选择器配置
+│       ├── downloader.py # 图片下载
+│       ├── browser.py  # 浏览器管理
+│       └── utils.py    # 工具函数
 ├── scripts/            # CLI入口脚本
 │   ├── run_analysis.py # 主分析脚本
 │   ├── pdf2word.py     # PDF转Word
 │   ├── md2word.py      # Markdown转Word
 │   ├── url2md.py       # URL转Markdown
 │   └── cleanup.py      # 清理脚本
+├── .opencode/skills/   # OpenCode Skills
+│   └── url2md/         # URL转Markdown Skill
 ├── tests/              # 单元测试
 ├── docs/               # 文档
 ├── Makefile            # Make 命令
