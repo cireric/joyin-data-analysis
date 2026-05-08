@@ -10,6 +10,9 @@ pdf2docx==0.5.8
 # Markdown to Word
 pypandoc==1.14
 
+# Markdown to PDF
+weasyprint>=60.0
+
 # URL to Markdown (Web Scraping)
 playwright>=1.40.0
 aiohttp>=3.9.0
