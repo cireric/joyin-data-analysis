@@ -170,6 +170,16 @@ def convert_md_to_pdf(
 
     extra_args = ["--pdf-engine", selected_engine]
 
+    if selected_engine == "wkhtmltopdf":
+        css_content = """
+body { background-color: white; }
+img { max-width: 600px; max-height: 800px; display: block; margin: 1em auto; }
+figure { margin: 1em 0; text-align: center; }
+"""
+        css_file = output_path.with_suffix(".temp.css")
+        css_file.write_text(css_content, encoding="utf-8")
+        extra_args.extend(["--css", str(css_file)])
+
     if detect_chinese(processed_content):
         font = get_chinese_font()
         if font:
@@ -190,6 +200,10 @@ def convert_md_to_pdf(
         print(f"  extra_args={extra_args}")
 
     temp_md = output_path.with_suffix(".temp.md")
+    css_file = None
+    if selected_engine == "wkhtmltopdf":
+        css_file = output_path.with_suffix(".temp.css")
+    
     try:
         temp_md.write_text(processed_content, encoding="utf-8")
         pypandoc.convert_file(
@@ -201,6 +215,8 @@ def convert_md_to_pdf(
     finally:
         if temp_md.exists():
             temp_md.unlink()
+        if css_file and css_file.exists():
+            css_file.unlink()
 
 
 def main():
