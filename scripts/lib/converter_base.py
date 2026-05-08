@@ -97,7 +97,7 @@ def get_available_pdf_engines() -> list:
                 import weasyprint
 
                 available.append(engine)
-            except ImportError:
+            except (ImportError, OSError):
                 pass
         elif engine in ("xelatex", "pdflatex"):
             if shutil.which(engine):
@@ -105,6 +105,16 @@ def get_available_pdf_engines() -> list:
         elif engine == "wkhtmltopdf":
             if shutil.which("wkhtmltopdf"):
                 available.append(engine)
+            else:
+                wk_paths = [
+                    r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",
+                    r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe",
+                ]
+                for path in wk_paths:
+                    if os.path.isfile(path):
+                        os.environ["PATH"] = os.path.dirname(path) + os.pathsep + os.environ.get("PATH", "")
+                        available.append(engine)
+                        break
     return available
 
 
