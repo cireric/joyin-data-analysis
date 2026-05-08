@@ -16,6 +16,13 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).parent))
+from lib.converter_base import (
+    validate_input as _validate_input,
+    resolve_output as _resolve_output,
+    find_pandoc,
+)
+
 
 class Md2WordError(Exception):
     """Markdown转Word工具基础异常"""
@@ -66,55 +73,11 @@ def parse_args():
 
 
 def validate_input(input_path: str) -> Path:
-    path = Path(input_path)
-
-    if not path.exists():
-        raise InputFileNotFoundError(f"文件不存在: {input_path}")
-
-    if path.suffix.lower() not in ('.md', '.markdown'):
-        raise InvalidMarkdownError(f"文件格式错误: 需要Markdown文件(.md)，当前为 {path.suffix}")
-
-    return path
+    return _validate_input(input_path, (".md", ".markdown"))
 
 
 def resolve_output(input_path: Path, output_arg: str, force: bool) -> Path:
-    if output_arg:
-        output_path = Path(output_arg)
-    else:
-        output_path = input_path.with_suffix('.docx')
-
-    if output_path.exists() and not force:
-        print(f"错误: 输出文件已存在: {output_path}", file=sys.stderr)
-        print(f"提示: 使用 --force 参数强制覆盖", file=sys.stderr)
-        sys.exit(1)
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    return output_path
-
-
-def _find_pandoc() -> Optional[str]:
-    """在常见安装路径中查找 pandoc.exe"""
-    # 先尝试 PATH 中的 pandoc
-    pandoc_path = shutil.which("pandoc")
-    if pandoc_path:
-        return pandoc_path
-    candidates = [
-        os.path.expandvars(r'%LOCALAPPDATA%\Pandoc\pandoc.exe'),
-        os.path.expandvars(r'%ProgramFiles%\Pandoc\pandoc.exe'),
-        os.path.expandvars(r'%ProgramFiles(x86)%\Pandoc\pandoc.exe'),
-        os.path.expandvars(r'%LOCALAPPDATA%\Microsoft\WinGet\Packages\JohnMacFarlane.Pandoc_Microsoft.Winget.Source_8wekyb3d8bbwe\pandoc-3.9.0.2\pandoc.exe'),
-    ]
-    for path in candidates:
-        if path and os.path.isfile(path):
-            return path
-
-    wg_base = os.path.expandvars(r'%LOCALAPPDATA%\Microsoft\WinGet\Packages')
-    if os.path.isdir(wg_base):
-        for root, _, files in os.walk(wg_base):
-            if 'pandoc.exe' in files:
-                return os.path.join(root, 'pandoc.exe')
-
-    return None
+    return _resolve_output(input_path, output_arg, force, ".docx")
 
 
 def _default_font_template_path() -> Optional[str]:
@@ -154,7 +117,7 @@ def convert_md_to_docx(input_path: Path, output_path: Path,
             "pypandoc 未安装，请运行: pip install pypandoc"
         )
 
-    pandoc_path = _find_pandoc()
+    pandoc_path = find_pandoc()
     if pandoc_path:
         os.environ['PATH'] = os.path.dirname(pandoc_path) + os.pathsep + os.environ.get('PATH', '')
         if debug:
