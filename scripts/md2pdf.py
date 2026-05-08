@@ -165,6 +165,30 @@ def convert_md_to_pdf(
 
     content = input_path.read_text(encoding="utf-8")
     processed_content = re.sub(r'!\[[^\]]*\]', '![]', content)
+    
+    lines = processed_content.split('\n')
+    new_lines = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith('**作者：**'):
+            author = line.replace('**作者：**', '').strip()
+            new_lines.append(f"**作者：** {author}  ")
+            i += 1
+        elif line.startswith('**发布时间：**'):
+            time = line.replace('**发布时间：**', '').strip()
+            new_lines.append(f"**发布时间：** {time}  ")
+            i += 1
+        elif line.startswith('**来源：**'):
+            url = line.replace('**来源：**', '').strip()
+            new_lines.append(f"**来源：** [{url}]({url})")
+            i += 1
+        else:
+            new_lines.append(lines[i])
+            i += 1
+    
+    processed_content = '\n'.join(new_lines)
+    
     selected_engine = select_pdf_engine(processed_content, pdf_engine, debug)
     frontmatter = parse_frontmatter(content)
 
@@ -173,10 +197,12 @@ def convert_md_to_pdf(
     css_file = None
     if selected_engine == "wkhtmltopdf":
         css_content = """
-body { background-color: white; margin: 0; padding: 20px; }
-img { width: 480px; height: 600px; display: block; margin: 1em auto; object-fit: contain; }
+body { background-color: white; margin: 0; padding: 8px 12px; }
+h1 { margin-top: 0; margin-bottom: 0.3em; }
+img { max-width: 480px; max-height: 600px; display: block; margin: 1em auto; object-fit: contain; }
 figure { margin: 1em 0; text-align: center; }
-p, h1, h2, h3, h4, h5, h6 { margin: 0.5em 0; }
+p, h1, h2, h3, h4, h5, h6 { margin: 0.3em 0; }
+a { color: #0066cc; text-decoration: none; }
 """
         css_file = output_path.with_suffix(".temp.css")
         css_file.write_text(css_content, encoding="utf-8")
