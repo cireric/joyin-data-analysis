@@ -49,7 +49,10 @@
 
 ## Security Rules
 - All file operations (read, write, edit) must be restricted to the project directory (`D:\Project\source\__TEST__\data_analysis\`) — accessing or modifying files outside this path is prohibited.
+- **CRITICAL**: Any operations on files or directories outside the project directory (including read, write, delete, and all other operations) MUST receive explicit user confirmation before proceeding.
 
 ## Workflow
 - After writing code, verify by running the script and checking output
-- Completed implementation plans should be archived to `docs/superpowers/archive/`
+- Design documents should be placed in `docs/superpowers/specs/`
+- Implementation plans should be placed in `docs/superpowers/plans/`
+- Completed implementation plans should be archived to `docs/superpowers/archive/` after user confirmation
